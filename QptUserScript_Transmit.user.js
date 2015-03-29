@@ -2,7 +2,7 @@
 // @name        QptUserScript_Transmit
 // @namespace   User Script for QingyingPT
 // @description	nothing useful
-// @version     0.53.2015.03280909
+// @version     0.54.2015.03281100
 // @author      ZunSThy
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
@@ -34,13 +34,13 @@ function e(h){var j='bbcode';var k="code";var l="code";var m="code";b(h);h=h.rep
 
 
 var htmlspecialchars = {
-    'lt': '<',
-    'gt': '>',
-    'nbsp': ' ',
-    'amp': '&',
-    'quot': '"',
-    'nbsp': ' ',
-		'mdash': '—'
+	'lt': '<',
+	'gt': '>',
+	'nbsp': ' ',
+	'amp': '&',
+	'quot': '"',
+	'nbsp': ' ',
+	'mdash': '—'
 };
 
 function hsc_decode(str){
@@ -105,195 +105,213 @@ function getHTML(val, callback) {
 }
 
 function chooseLink(val) {
-    changeTitle("");
-    changeSubtitle("");
-    changeUrl("");
-    changeDburl("");
-    var old_descr = $("textarea#descr").val();
-    changeDescr("");
-    if (/https?:\/\/totheglory.im\/t\/\d+\//.test(val)) {
-			console.log("ttg link");
-			getHTML(val, function(doc){
-				var sub = $(doc);
-				var title = sub.find("h1")[0].innerHTML;
-			 	title.replace(/([^\[]+)\[([^\]]+)\]([\S\s]*)/, function(m, p1, p2, p3){
-					changeTitle(p1);
-					if(p3) changeSubtitle(p2 + '[' + p3 + ']');
-					else changeSubtitle(p2);
-				});
-				getLink(doc);
-				console.log(sub.find("#kt_d")[0]);
-				var descr = sub.find("#kt_d")[0].innerHTML;
-			 	changeDescr(descr);
+	console.log(val);
+	changeTitle("");
+	changeSubtitle("");
+	changeUrl("");
+	changeDburl("");
+  var old_descr = $("textarea#descr").val().trim();
+	changeDescr("");
+	if (/https?:\/\/totheglory.im\/t\/\d+\//.test(val)) {
+		console.log("ttg link");
+		getHTML(val, function(doc){
+			var sub = $(doc);
+			var title = sub.find("h1")[0].innerHTML;
+			title.replace(/([^\[]+)\[([^\]]+)\]([\S\s]*)/, function(m, p1, p2, p3){
+				changeTitle(p1);
+				if(p3) changeSubtitle(p2 + '[' + p3 + ']');
+				else changeSubtitle(p2);
 			});
-    } else if (/https?:\/\/hdwing.com\/details.php\?id=\d{3,}/.test(val)) {
-			console.log("hdwing link");
-    } else if(/https?:\/\/pt\.hit\.edu\.cn\/details\.php\?(hit=1&)?id=\d+/.test(val)){
-			console.log("QingyingPT link");
-			getHTML(val, function(doc) {
-				var sub = $(doc);
-				var title = sub.find("#top")[0].innerHTML
-					.replace(/([^<]+)<[\S\s]+/, "$1").trim();
-				changeTitle(hsc_decode(title));
-				var subtitle = sub.find("td.rowhead:contains('副标题')")[0]
-					.nextElementSibling.innerHTML;
-				changeSubtitle(subtitle);
-				getLink(doc);
+			console.log(sub.find("#kt_d")[0]);
+			var descr = sub.find("#kt_d")[0].innerHTML;
+			changeDescr(descr);
+			getLink(doc);
+		});
+	} else if (/https?:\/\/hdwing.com\/details.php\?id=\d{3,}/.test(val)){
+		console.log("hdwing link");
+	} else if(/https?:\/\/pt\.hit\.edu\.cn\/details\.php\?(hit=1&)?id=\d+/.test(val)){
+		console.log("QingyingPT link");
+		getHTML(val, function(doc) {
+			var sub = $(doc);
+			var title = sub.find("#top")[0].innerHTML
+				.replace(/([^<]+)<[\S\s]+/, "$1").trim();
+			changeTitle(hsc_decode(title));
+			var subtitle = sub.find("td.rowhead:contains('副标题')")[0]
+				.nextElementSibling.innerHTML;
+			changeSubtitle(subtitle);
+			getLink(doc);
 
-				sub.find("#ad_torrentdetail").remove();
-				sub.find("fieldset:first-of-type").remove();
-				//console.log(sub.find("fieldset:first-of-type"));
-				sub.find("fieldset:first-of-type").remove();
-				var descr = sub.find("#kdescr")[0].innerHTML;
-				changeDescr(descr);
-			});
-    } else if (/https?:\/\/pt\.hit\.edu\.cn\/edit\.php\?(returnto=.+&)*id=\d{3,}/.test(val)) {
-			console.log("QingyingPT link");
-			getHTML(val, function(doc){
-				var sub = $(doc);
-				var title = sub.find("input#name")[0].value;
-				changeTitle(title);
-				var subtitle = sub.find("input#small_descr")[0].value;
-				changeSubtitle(subtitle);
-				var descr = sub.find("textarea#descr")[0].innerHTML;
-				changeDescr(descr);
-				var url = sub.find("input#url")[0].value;
-				console.log(url);
-				changeUrl(url);
-				var dburl = sub.find("input#dburl")[0].value;
-				changeDburl(dburl);
-			});
-    } else if (/https?:\/\/chdbits.org\/details\.php\?id=\d{3,}/.test(val)) {
-			console.log("CHDbits link");
-		} else if (/https?:\/\/www\.open\.cd\/plugin_details\.php\?id=\d+/.test(val)) {
-			console.log("OpenCD link");
-    } else if (/https?:\/\/hudbt\.hust\.edu\.cn\/details\.php\?id=\d+/.test(val)) {
-			console.log("HUD link");
-			getHTML(val, function(doc){
-				var sub = $(doc);
-				console.log(sub.find("title"));
-				var title = sub.find("#page-title")[0].innerHTML
-					.replace(/<a[\S\s]+/, "").trim();
-				changeTitle(title);
-				var subtitle = sub.find("dt:contains('副标题') + dd")[0].innerHTML;
-				changeSubtitle(subtitle);
-				var descr = sub.find("#kdescr>.bbcode")[0].innerHTML;
-				descr = e(descr).trim()
-					.replace(/\[img\](attachments\/.+?)\[\/img\]/, "[img]//hudbt.hust.edu.cn/$1[/img]");
-				$("textarea#descr").val(descr);
-				getLink(doc);
-			});
-		} else if(/https?:\/\/bt\.byr\.cn\/details\.php\?id=\d{3,}/.test(val)){
-			console.log("BYR link");
-			getHTML(val, function(doc){
-				var sub = $(doc);
-				console.log(sub);
-				var title = sub.find("#share")[0].innerHTML
-					.replace(/\]&[\S\s]+/, "]").trim();
-				changeTitle(title);
-				var descr = sub.find("#kdescr")[0].innerHTML;
-				descr = e(descr).trim();
-				$("textarea#descr").val(descr);
-				getLink(doc);
-			});
-		} else if(/https?:\/\/([^.]+\.)?mteam\.cc\/details\.php\?.+id=\d+/.test(val)){
-			console.log("M-team link");
-			getHTML(val, function(doc){
-				var sub = $(doc);
-				var title = sub.find(".index")[0].innerHTML
-					.match(/\]\.([\S\s]+?)\.torrent/)[1];
-				changeTitle(title);
-				var subtitle = sub.find(".rowhead[name^='Small'] + td")[0].innerHTML
-					.replace(/\[([\S\s]+)\]/, "*$1");
-				changeSubtitle(subtitle);
-				var descr = sub.find("#kdescr")[0].innerHTML;
-				descr = e(descr).trim().replace(/\[img\]imagecache\.php\?url=([^\[]+)\[\/img\]/, function(m, p1){
-					return ('[img]' + decodeURI(p1) + '[/img]');
-				})
-				$("textarea#descr").val(descr);
-				getLink(doc);
-			});
-    } else if (/https?:\/\/([^\/]+?)\/details\.php\?id=\d{3,}/.test(val)) {
-			console.log("NexusPHP link");
-			getHTML(val, function(doc){
-				var descr = sub.find("#kdescr")[0].innerHTML;
-				changeDescr(descr);
-			});
+			sub.find("#ad_torrentdetail").remove();
+			sub.find("fieldset:first-of-type").remove();
+			//console.log(sub.find("fieldset:first-of-type"));
+			sub.find("fieldset:first-of-type").remove();
 			var descr = sub.find("#kdescr")[0].innerHTML;
 			changeDescr(descr);
-		} else if(/https?:\/\/bt\.neu6\.edu\.cn\/thread-\d+\-1\-1\.html/.test(val)){
-			console.log("6V link");
-			getHTML(val, function(doc){
-				var sub = $(doc);
-				var linkpre = "\/\/bt\.neu6\.edu\.cn";
-				var title = sub.find("#thread_subject")[0].innerHTML;
-				changeTitle(title);
-				sub.find(".pcbs div[id][id^=aimg]").remove();
-				sub.find(".pcbs img[id][id^=aimg]").each(function(){
-					console.log(this.getAttribute("file"));
-					this.src = linkpre + this.getAttribute("file");
-				});
-				var descr = sub.find(".pcbs td")[0].innerHTML;
-				descr = e(descr);
-				descr = hsc_decode(descr.replace(/\[img\](static.+?)\[\/img]/, function(m, p1){
-					return "[img]"+ linkpre + p1 + "[/img]";
-				}).trim());
-				$('textarea#descr').val(descr);
-				//$('textarea#descr').val(descr.replace(/\[img\]static[\S\s]+?\[\/url\][\S\s]+?\[\/b\]/, "").trim());
-				getLink(doc);
+		});
+	} else if (/https?:\/\/pt\.hit\.edu\.cn\/edit\.php\?(returnto=.+&)*id=\d{3,}/.test(val)) {
+		console.log("QingyingPT link");
+		getHTML(val, function(doc){
+			var sub = $(doc);
+			var title = sub.find("input#name")[0].value;
+			changeTitle(title);
+			var subtitle = sub.find("input#small_descr")[0].value;
+			changeSubtitle(subtitle);
+			var descr = sub.find("textarea#descr")[0].innerHTML;
+			changeDescr(descr);
+			var url = sub.find("input#url")[0].value;
+			console.log(url);
+			changeUrl(url);
+			var dburl = sub.find("input#dburl")[0].value;
+			changeDburl(dburl);
+		});
+	} else if (/https?:\/\/chdbits.org\/details\.php\?id=\d{3,}/.test(val)) {
+		console.log("CHDbits link");
+	} else if (/https?:\/\/www\.open\.cd\/plugin_details\.php\?id=\d+/.test(val)) {
+		console.log("OpenCD link");
+	} else if (/https?:\/\/hudbt\.hust\.edu\.cn\/details\.php\?id=\d+/.test(val)) {
+		console.log("HUD link");
+		getHTML(val, function(doc){
+			var sub = $(doc);
+			console.log(sub.find("title"));
+			var title = sub.find("#page-title")[0].innerHTML
+				.replace(/<a[\S\s]+/, "").trim();
+			changeTitle(title);
+			var subtitle = sub.find("dt:contains('副标题') + dd")[0].innerHTML;
+			changeSubtitle(subtitle);
+			var descr = sub.find("#kdescr>.bbcode")[0].innerHTML;
+			descr = e(descr).trim()
+				.replace(/\[img\](attachments\/.+?)\[\/img\]/, "[img]//hudbt.hust.edu.cn/$1[/img]");
+			$("textarea#descr").val(descr);
+			getLink(doc);
+		});
+	} else if(/https?:\/\/bt\.byr\.cn\/details\.php\?id=\d{3,}/.test(val)){
+		console.log("BYR link");
+		getHTML(val, function(doc){
+			var sub = $(doc);
+			console.log(sub);
+			var title = sub.find("#share")[0].innerHTML
+				.replace(/\]&[\S\s]+/, "]").trim();
+			changeTitle(title);
+			var descr = sub.find("#kdescr")[0].innerHTML;
+			descr = e(descr).trim();
+			$("textarea#descr").val(descr);
+			getLink(doc);
+		});
+	} else if(/https?:\/\/tp\.m\-team\.cc\/details\.php\?id=\d+/.test(val)){
+		console.log("M-team link");
+		getHTML(val, function(doc){
+			var sub = $(doc);
+			var title = sub.find("h1#top")[0].innerHTML;
+			changeTitle(title);
+			var subtitle = sub.find("td:contains('副標題') + td")[0].innerHTML
+				.replace(/\[([\S\s]+)\]/, "*$1");
+			changeSubtitle(subtitle);
+			var descr = sub.find("#kdescr")[0].innerHTML;
+			descr = e(descr).replace(/\[img\]imagecache\.php\?url=([^\[]+)\[\/img\]/, function(m, p1){
+				return ('[img]' + decodeURI(p1) + '[/img]');
 			});
-		} else if(/http:\/\/bbs\.3dmgame\.com\/thread\-\d+\-1\-1\.html/.test(val)){
-			console.log("3DMGame link");
-			getHTML(val, function(doc){
-				var sub = $(doc);
-				var title = sub.find("#thread_subject")[0].innerHTML;
-				changeTitle(title);
-				//sub.find(".pcbs td p:first-of-type").remove();
-				sub.find(".pcbs td .quote:first-of-type").remove();
-				sub.find(".pcbs td .quote:first-of-type").remove();
-				var descr = sub.find(".pcbs td")[0].innerHTML;
-				descr = e(descr);
-				$('textarea#descr').val(descr.replace(/----------------[\S\s]+/, "").trim());
+			// descr = e(descr);
+			$("textarea#descr").val(descr);
+			getLink(doc);
+		});
+	} else if(/https?:\/\/ccfbits\.org\/details\.php\?id=\d+/.test(val)){
+		console.log("CCF link");
+		getHTML(val, function(doc){
+			var sub = $(doc);
+			var title = sub.find("h1")[0].innerHTML;
+			changeTitle(hsc_decode(title));
+			var subtitle = sub.find("td.rowhead:contains('中文名称') + td")[0].innerHTML;
+			changeSubtitle(subtitle);
+			//TODO: sub.find(".postpic")[0].src = "";
+			var descr = sub.find("div.node")[0].innerHTML;
+			changeDescr(descr);
+		});
+	} else if (/https?:\/\/([^\/]+?)\/details\.php\?id=\d{3,}/.test(val)) {
+		console.log("NexusPHP link");
+		getHTML(val, function(doc) {
+			var sub = $(doc);
+			var title = sub.find("#top")[0].innerHTML
+				.replace(/([^<]+)<[\S\s]+/, "$1").trim();
+			changeTitle(hsc_decode(title));
+			var subtitle = sub.find("td.rowhead:contains('副标题')")[0]
+				.nextElementSibling.innerHTML;
+			changeSubtitle(subtitle);
+			sub.find("#ad_torrentdetail").remove();
+			var descr = sub.find("#kdescr")[0].innerHTML;
+			changeDescr(descr);
+			getLink(doc);
+		});
+	} else if(/https?:\/\/bt\.neu6\.edu\.cn\/thread-\d+\-1\-1\.html/.test(val)){
+		console.log("6V link");
+		getHTML(val, function(doc){
+			var sub = $(doc);
+			var linkpre = "\/\/bt\.neu6\.edu\.cn";
+			var title = sub.find("#thread_subject")[0].innerHTML;
+			changeTitle(title);
+			sub.find(".pcbs div[id][id^=aimg]").remove();
+			sub.find(".pcbs img[id][id^=aimg]").each(function(){
+				console.log(this.getAttribute("file"));
+				this.src = linkpre + this.getAttribute("file");
 			});
-		} else if(/https?:\/\/.+?\/thread-\d+\-1\-1\.html/.test(val)){
-			console.log("DZ link");
-			getHTML(val, function(doc){
-				var sub = $(doc);
-				var title = sub.find("#thread_subject")[0].innerHTML;
-				changeTitle(title);
-				var descr = sub.find(".pcbs td")[0].innerHTML;
-				changeDescr(descr);
-				getLink(doc);
+			var descr = sub.find(".pcbs td")[0].innerHTML;
+			descr = e(descr);
+			descr = hsc_decode(descr.replace(/\[img\](static.+?)\[\/img]/, function(m, p1){
+				return "[img]"+ linkpre + p1 + "[/img]";
+			}).trim());
+			$('textarea#descr').val(descr);
+			//$('textarea#descr').val(descr.replace(/\[img\]static[\S\s]+?\[\/url\][\S\s]+?\[\/b\]/, "").trim());
+			getLink(doc);
+		});
+	} else if(/http:\/\/bbs\.3dmgame\.com\/thread\-\d+\-1\-1\.html/.test(val)){
+		console.log("3DMGame link");
+		getHTML(val, function(doc){
+			var sub = $(doc);
+			var title = sub.find("#thread_subject")[0].innerHTML;
+			changeTitle(title);
+			//sub.find(".pcbs td p:first-of-type").remove();
+			sub.find(".pcbs td .quote:first-of-type").remove();
+			sub.find(".pcbs td .quote:first-of-type").remove();
+			var descr = sub.find(".pcbs td")[0].innerHTML;
+			descr = e(descr);
+			$('textarea#descr').val(descr.replace(/----------------[\S\s]+/, "").trim());
+		});
+	} else if(/https?:\/\/.+?\/thread-\d+\-1\-1\.html/.test(val)){
+		console.log("DZ link");
+		getHTML(val, function(doc){
+			var sub = $(doc);
+			var title = sub.find("#thread_subject")[0].innerHTML;
+			changeTitle(title);
+			var descr = sub.find(".pcbs td")[0].innerHTML;
+			changeDescr(descr);
+			getLink(doc);
+		});
+	} else if (/https?:\/\/store\.steampowered\.com\/app\/\d{3,}/.test(val)) {
+		console.log("Steam Store IMG");
+		getHTML(val, function(doc){
+			var appid = val.match(/\/(\d+)\//)[1];
+			var linkpre = '//cdn.akamai.steamstatic.com/steam/apps/' + appid + '/';
+			var sub = $(doc);
+			var imgs = [ ];
+			sub.find(".screenshot_holder>a").each(function(){
+				//console.log(this.dataset.screenshotid);
+				imgs.push(this.dataset.screenshotid);
 			});
-    } else if (/https?:\/\/store\.steampowered\.com\/app\/\d{3,}/.test(val)) {
-			console.log("Steam Store IMG");
-			getHTML(val, function(doc){
-				var appid = val.match(/\/(\d+)\//)[1];
-				var linkpre = '//cdn.akamai.steamstatic.com/steam/apps/' + appid + '/';
-				var sub = $(doc);
-
-				var imgs = [ ];
-				sub.find(".screenshot_holder>a").each(function(){
-					//console.log(this.dataset.screenshotid);
-					imgs.push(this.dataset.screenshotid);
-				});
-				var imgarea = "\n[img]" + linkpre + imgs.join("[/img]\n[img]"+linkpre) + "[/img]\n";
-
-				var requirementarea = "";
-				if(old_descr != ""){
-					$("textarea#descr").val(old_descr + '\n' + imgarea);
-				} else {
-					descr = "【[b]游戏封面[/b]】\n\n\n【[b]概要信息[/b]】\n\n\n【[b]游戏简介[/b]】\n\n\n【[b]安装说明[/b]】\n\n\n";
-					if(requirementarea)
-						descr += "【[b]系统需求[/b]】[size=2][i][quote=系统需求]" + requirementarea + "[/quote][/size][/i]\n\n";
-					descr += "【[b]游戏截图[/b]】" + imgarea;
-					$("textarea#descr").val(descr);
-				}
-			});
-    } else {
-			console.log("Unsupported link");
- 			return;
-    }
+			var imgarea = "\n[img]" + linkpre + imgs.join("[/img]\n[img]"+linkpre) + "[/img]\n";
+			var requirementarea = "";
+			if(old_descr != ""){
+				$("textarea#descr").val(old_descr + '\n' + imgarea);
+			} else {
+				descr = "【[b]游戏封面[/b]】\n\n\n【[b]概要信息[/b]】\n\n\n【[b]游戏简介[/b]】\n\n\n【[b]安装说明[/b]】\n\n\n";
+				if(requirementarea)
+					descr += "【[b]系统需求[/b]】[size=2][i][quote=系统需求]" + requirementarea + "[/quote][/size][/i]\n\n";
+				descr += "【[b]游戏截图[/b]】" + imgarea;
+				$("textarea#descr").val(descr);
+			}
+		});
+	} else {
+		console.log("Unsupported link");
+ 		return;
+	}
 }
 
 var insert_tr = '<tr>'
