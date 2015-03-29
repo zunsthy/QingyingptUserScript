@@ -4,6 +4,8 @@
 // @description	nothing useful
 // @version     0.53.2015.03280909
 // @author      ZunSThy
+// @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
+// @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
 // @icon        
 // @icon64      
 // @domain      pt.hit.edu.cn
