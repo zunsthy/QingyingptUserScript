@@ -15,7 +15,7 @@ https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScr
 
 2.Ignore Top Banner and nav to nav bar.
 
-https://github.com/zunsthy/QingyingptUserScript/blob/master/QptUserScript_IgnoreBanner.user.js
+https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_IgnoreBanner.user.js
 
 Note
 ====
