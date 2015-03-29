@@ -10,9 +10,11 @@ https://openuserjs.org/about/Userscript-Beginners-HOWTO
 Install
 =======
 1.Upload (Transmit?) torrent from other sites such as CHDbits, HDWinG, etc.
+
 https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
 
 2.Ignore Top Banner and nav to nav bar.
+
 https://github.com/zunsthy/QingyingptUserScript/blob/master/QptUserScript_IgnoreBanner.user.js
 
 Note
