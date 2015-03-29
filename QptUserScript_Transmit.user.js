@@ -4,7 +4,7 @@
 // @description	nothing useful
 // @version     0.54.2015.03281100
 // @author      ZunSThy
-// @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
+// @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
 // @icon        
 // @icon64      
