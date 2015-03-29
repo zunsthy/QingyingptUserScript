@@ -2,7 +2,7 @@
 // @name        QptUserScript_Transmit
 // @namespace   User Script for QingyingPT
 // @description	nothing useful
-// @version     0.54.2015.03281100
+// @version     0.54.201503281100
 // @author      ZunSThy
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
