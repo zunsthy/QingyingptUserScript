@@ -6,8 +6,6 @@
 // @author      ZunSThy
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
-// @icon        
-// @icon64      
 // @domain      pt.hit.edu.cn
 // @match       http://pt.hit.edu.cn/edit.php*
 // @match       http://pt.hit.edu.cn/upload.php
