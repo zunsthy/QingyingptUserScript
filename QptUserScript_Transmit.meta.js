@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name        QptUserScript_Transmit
-// @namespace   User Script for QingyingPT
+// @namespace   http://pt.hit.edu.cn/User_Script_for_QingyingPT
 // @description	nothing useful
-// @version     0.54.201503281100
+// @version     0.5.4
 // @author      ZunSThy
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
