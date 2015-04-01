@@ -41,11 +41,12 @@ var htmlspecialchars = {
 	'mdash': '—'
 };
 
-function hsc_decode(str){
-	return str.replace(/&([a-z#0-9]+);/g, function(m, p1){
+String.prototype.hsc_decode = function(){
+	return this.replace(/&([a-z#0-9]+);/g, function(m, p1){
 		return htmlspecialchars[p1];
 	});
 }
+
 
 String.prototype.spaces2space = function(){
 	return this.replace(/\s+/, " ");
@@ -55,7 +56,7 @@ function changeTitle(str) {
 	if (/edit\.php/.test(document.location)) 
 		return;
 	if(str) console.log(str);
-	$('input#name').val(str.spaces2space().trim());
+	$('input#name').val(str.spaces2space().trim().hsc_decode());
 }
 
 function changeSubtitle(str) {
@@ -74,7 +75,7 @@ function changeDburl(str) {
 }
 
 function changeDescr(raw) {
- 	var str = e(raw);
+ 	var str = e(raw).hsc_decode();
 	$('textarea#descr').val(str);
 }
 
@@ -133,7 +134,7 @@ function chooseLink(val) {
 			var sub = $(doc);
 			var title = sub.find("#top")[0].innerHTML
 				.replace(/([^<]+)<[\S\s]+/, "$1").trim();
-			changeTitle(hsc_decode(title));
+			changeTitle(title);
 			var subtitle = sub.find("td.rowhead:contains('副标题')")[0]
 				.nextElementSibling.innerHTML;
 			changeSubtitle(subtitle);
@@ -217,7 +218,7 @@ function chooseLink(val) {
 		getHTML(val, function(doc){
 			var sub = $(doc);
 			var title = sub.find("h1")[0].innerHTML;
-			changeTitle(hsc_decode(title));
+			changeTitle(title);
 			var subtitle = sub.find("td.rowhead:contains('中文名称') + td")[0].innerHTML;
 			changeSubtitle(subtitle);
 			//TODO: sub.find(".postpic")[0].src = "";
@@ -230,7 +231,7 @@ function chooseLink(val) {
 			var sub = $(doc);
 			var title = sub.find("#top")[0].innerHTML
 				.replace(/([^<]+)<[\S\s]+/, "$1").trim();
-			changeTitle(hsc_decode(title));
+			changeTitle(title);
 			var subtitle = sub.find("td.rowhead:contains('副标题')")[0]
 				.nextElementSibling.innerHTML;
 			changeSubtitle(subtitle);
@@ -253,9 +254,9 @@ function chooseLink(val) {
 			});
 			var descr = sub.find(".pcbs td")[0].innerHTML;
 			descr = e(descr);
-			descr = hsc_decode(descr.replace(/\[img\](static.+?)\[\/img]/, function(m, p1){
+			descr = descr.replace(/\[img\](static.+?)\[\/img]/, function(m, p1){
 				return "[img]"+ linkpre + p1 + "[/img]";
-			}).trim());
+			}).trim().hsc_decode();
 			$('textarea#descr').val(descr);
 			//$('textarea#descr').val(descr.replace(/\[img\]static[\S\s]+?\[\/url\][\S\s]+?\[\/b\]/, "").trim());
 			getLink(doc);
