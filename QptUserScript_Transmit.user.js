@@ -1,9 +1,8 @@
 // ==UserScript==
 // @name        QptUserScript_Transmit
-// @namespace   http://pt.hit.edu.cn/User_Script_for_QingyingPT
+// @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @description	nothing useful
-// @version     0.5.4
-// @author      ZunSThy
+// @version     0.5.4.2015090406.923
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
 // @domain      pt.hit.edu.cn
@@ -15,7 +14,6 @@
 // @include     http://pt.hit.edu.cn/uploadnew.php
 // @grant       GM_xmlhttpRequest
 // @require     http://pt.hit.edu.cn/jquerylib/jquery-1.7.2.min.js
-// @copyright   2014-2015
 // ==/UserScript==
 
 // Powered by Mort(5787) & ZunSThy(1788)
@@ -45,36 +43,35 @@ String.prototype.hsc_decode = function(){
 	return this.replace(/&([a-z#0-9]+);/g, function(m, p1){
 		return htmlspecialchars[p1];
 	});
-}
-
+};
 
 String.prototype.spaces2space = function(){
 	return this.replace(/\s+/, " ");
-}
+};
 
-function changeTitle(str) {
+function changeTitle(str){
 	if (/edit\.php/.test(document.location)) 
 		return;
 	if(str) console.log(str);
 	$('input#name').val(str.spaces2space().trim().hsc_decode());
 }
 
-function changeSubtitle(str) {
+function changeSubtitle(str){
 	if(str) console.log(str);
 	$('input#small_descr').val(str.spaces2space().trim());
 }
 
-function changeUrl(str) {
+function changeUrl(str){
 	if (str) console.log(str);
 	$('input#url').val(str.trim());
 }
 
-function changeDburl(str) {
+function changeDburl(str){
 	if (str) console.log(str);
 	$('input#dburl').val(str.trim());
 }
 
-function changeDescr(raw) {
+function changeDescr(raw){
  	var str = e(raw).hsc_decode();
 	$('textarea#descr').val(str);
 }
@@ -88,7 +85,7 @@ function getLink(str){
 	});
 }
 
-function getHTML(val, callback) {
+function getHTML(val, callback){
 	GM_xmlhttpRequest({
 		method: 'GET',
 		url: val,
@@ -96,14 +93,14 @@ function getHTML(val, callback) {
 			'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
 			'Accept': 'application/atom+xml,application/xml,text/xml'
  		},
-		onload: function(response) {
+		onload: function(response){
 			//console.log(response.responseText);
 			callback(response.responseText);
 		}
  	});
 }
 
-function chooseLink(val) {
+function chooseLink(val){
 	console.log(val);
 	changeTitle("");
 	changeSubtitle("");
@@ -111,8 +108,8 @@ function chooseLink(val) {
 	changeDburl("");
   var old_descr = $("textarea#descr").val().trim();
 	changeDescr("");
-	if (/https?:\/\/totheglory.im\/t\/\d+\//.test(val)) {
-		console.log("ttg link");
+	if(/https?:\/\/totheglory.im\/t\/\d+\//.test(val)){
+		console.log("TTG link");
 		getHTML(val, function(doc){
 			var sub = $(doc);
 			var title = sub.find("h1")[0].innerHTML;
@@ -126,8 +123,8 @@ function chooseLink(val) {
 			changeDescr(descr);
 			getLink(doc);
 		});
-	} else if (/https?:\/\/hdwing.com\/details.php\?id=\d{3,}/.test(val)){
-		console.log("hdwing link");
+	} else if(/https?:\/\/hdwing\.science\/details\.php\?id=\d+/.test(val)){
+		console.log("HDWinG link(HDWinG.ORG)");
 	} else if(/https?:\/\/pt\.hit\.edu\.cn\/details\.php\?(hit=1&)?id=\d+/.test(val)){
 		console.log("QingyingPT link");
 		getHTML(val, function(doc) {
@@ -147,7 +144,7 @@ function chooseLink(val) {
 			var descr = sub.find("#kdescr")[0].innerHTML;
 			changeDescr(descr);
 		});
-	} else if (/https?:\/\/pt\.hit\.edu\.cn\/edit\.php\?(returnto=.+&)*id=\d{3,}/.test(val)) {
+	} else if (/https?:\/\/pt\.hit\.edu\.cn\/edit\.php\?(returnto=.+&)*id=\d+/.test(val)) {
 		console.log("QingyingPT link");
 		getHTML(val, function(doc){
 			var sub = $(doc);
@@ -163,7 +160,7 @@ function chooseLink(val) {
 			var dburl = sub.find("input#dburl")[0].value;
 			changeDburl(dburl);
 		});
-	} else if (/https?:\/\/chdbits.org\/details\.php\?id=\d{3,}/.test(val)) {
+	} else if (/https?:\/\/chdbits.org\/details\.php\?id=\d+/.test(val)) {
 		console.log("CHDbits link");
 	} else if (/https?:\/\/www\.open\.cd\/plugin_details\.php\?id=\d+/.test(val)) {
 		console.log("OpenCD link");
@@ -183,7 +180,7 @@ function chooseLink(val) {
 			$("textarea#descr").val(descr);
 			getLink(doc);
 		});
-	} else if(/https?:\/\/bt\.byr\.cn\/details\.php\?id=\d{3,}/.test(val)){
+	} else if(/https?:\/\/bt\.byr\.cn\/details\.php\?id=\d+/.test(val)){
 		console.log("BYR link");
 		getHTML(val, function(doc){
 			var sub = $(doc);
@@ -225,7 +222,7 @@ function chooseLink(val) {
 			var descr = sub.find("div.node")[0].innerHTML;
 			changeDescr(descr);
 		});
-	} else if (/https?:\/\/([^\/]+?)\/details\.php\?id=\d{3,}/.test(val)) {
+	} else if (/https?:\/\/([^\/]+?)\/details\.php\?id=\d+/.test(val)) {
 		console.log("NexusPHP link");
 		getHTML(val, function(doc) {
 			var sub = $(doc);
@@ -284,8 +281,8 @@ function chooseLink(val) {
 			changeDescr(descr);
 			getLink(doc);
 		});
-	} else if (/https?:\/\/store\.steampowered\.com\/app\/\d{3,}/.test(val)) {
-		console.log("Steam Store IMG");
+	} else if (/https?:\/\/store\.steampowered\.com\/app\/\d+/.test(val)) {
+		console.log("Steam Store");
 		getHTML(val, function(doc){
 			var appid = val.match(/\/(\d+)\//)[1];
 			var linkpre = '//cdn.akamai.steamstatic.com/steam/apps/' + appid + '/';
@@ -297,12 +294,19 @@ function chooseLink(val) {
 			});
 			var imgarea = "\n[img]" + linkpre + imgs.join("[/img]\n[img]"+linkpre) + "[/img]\n";
 			var requirementarea = "";
+			sub.find("div[class^=game_area_sys_req]").each(function(){
+				if(this.dataset.os){
+					requirementarea += "[size=2][i][quote=" + this.dataset.os + "]" 
+						+ e(this.innerHTML.replace(/[\t ]+/g, '').replace(/\n\n+/g, '')).replace(/\[\/?list\]/ig, '')
+						+ "[/quote][/size][/i]";
+				} 
+			});
 			if(old_descr != ""){
 				$("textarea#descr").val(old_descr + '\n' + imgarea);
 			} else {
 				descr = "【[b]游戏封面[/b]】\n\n\n【[b]概要信息[/b]】\n\n\n【[b]游戏简介[/b]】\n\n\n【[b]安装说明[/b]】\n\n\n";
 				if(requirementarea)
-					descr += "【[b]系统需求[/b]】[size=2][i][quote=系统需求]" + requirementarea + "[/quote][/size][/i]\n\n";
+					descr += "【[b]系统需求[/b]】" + requirementarea + "\n\n";
 				descr += "【[b]游戏截图[/b]】" + imgarea;
 				$("textarea#descr").val(descr);
 			}
@@ -314,15 +318,15 @@ function chooseLink(val) {
 }
 
 var insert_tr = '<tr>'
-		+ '<td valign="top" align="right" class="rowhead nowrap">参考链接</td>'
+		+ '<td valign="top" align="right" class="rowhead nowrap">參考鏈接</td>'
 		+ '<td valign="top" align="left" class="rowfollow"><input type="text" name="name" id="reflink" style="width: 650px;"></td>'
 		+ '</tr><tr>'
-		+ '<td valign="top" align="center" class="rowfollow" colspan="2">'
-		 + '<font class="medium">(仅支持部分NexusPHP模板的PT站点链接、Steam链接) version 1.0.0.43 清影PT制作于20141009</font>'
+		+ '<td class="rowhead"></td><td valign="top" align="left" class="rowfollow">'
+		 + '<font class="medium">(僅只支持部份NexusPHP模板PT/BT站點、DZ論壇、Steam鏈接) ver0.0.0.1 <a class="link" href="sendmessage.php?receiver=1788">ZunSThy@清影PT</a>製作自20141009</font>'
 		 + '</td>'
 		+ '</tr>';
 
-var position = $('form#compose tr:contains(标题)')[0];
+var position = $('form tr:contains(标题)')[0];
 
 $(insert_tr)
 .insertBefore(position)

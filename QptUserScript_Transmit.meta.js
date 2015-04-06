@@ -1,9 +1,8 @@
 // ==UserScript==
 // @name        QptUserScript_Transmit
-// @namespace   http://pt.hit.edu.cn/User_Script_for_QingyingPT
+// @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @description	nothing useful
-// @version     0.5.4
-// @author      ZunSThy
+// @version     0.5.4.2015090406.923
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
 // @domain      pt.hit.edu.cn
@@ -15,5 +14,4 @@
 // @include     http://pt.hit.edu.cn/uploadnew.php
 // @grant       GM_xmlhttpRequest
 // @require     http://pt.hit.edu.cn/jquerylib/jquery-1.7.2.min.js
-// @copyright   2014-2015
 // ==/UserScript==
