@@ -2,7 +2,7 @@
 // @name        QptUserScript_Transmit
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @description	nothing useful
-// @version     0.5.4.2015090406.923
+// @version     0.5.5.2015090406.109
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
 // @domain      pt.hit.edu.cn

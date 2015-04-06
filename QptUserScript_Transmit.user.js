@@ -2,7 +2,7 @@
 // @name        QptUserScript_Transmit
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @description	nothing useful
-// @version     0.5.4.2015090406.923
+// @version     0.5.5.2015090406.109
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
 // @domain      pt.hit.edu.cn
@@ -276,12 +276,12 @@ function chooseLink(val){
 		getHTML(val, function(doc){
 			var sub = $(doc);
 			var title = sub.find("#thread_subject")[0].innerHTML;
-			changeTitle(title);
+			changeSubtitle(title);
 			var descr = sub.find(".pcbs td")[0].innerHTML;
 			changeDescr(descr);
 			getLink(doc);
 		});
-	} else if (/https?:\/\/store\.steampowered\.com\/app\/\d+/.test(val)) {
+	} else if(/https?:\/\/store\.steampowered\.com\/app\/\d+/.test(val)){
 		console.log("Steam Store");
 		getHTML(val, function(doc){
 			var appid = val.match(/\/(\d+)\//)[1];
@@ -310,6 +310,27 @@ function chooseLink(val){
 				descr += "【[b]游戏截图[/b]】" + imgarea;
 				$("textarea#descr").val(descr);
 			}
+		});
+	} else if(/(http:\/\/)?movie\.douban\.com\/subject\/\d\d+/.test(val)){
+		console.log("Douban Movie");
+		getHTML(val, function(doc){
+			var sub = $(doc);
+			var title = sub.find("h1>span")[0].innerHTML;
+			var alias = sub.find("span.pl:contains(又名)")[0];
+			if(alias != undefined){
+				alias = alias.nextSibling.textContent.trim().replace(/\s+/g, '');
+				changeSubtitle(title.replace(/(\s|$)/, '/' + alias + ' '));
+			} else 
+				changeSubtitle(title);
+			var descr = sub.find("div#info")[0].innerHTML;
+			$("textarea#descr").val(e(descr).replace(/\[(url=[^\]]+|\/url)\]/g, ''));
+			
+			doc.replace(/www\.imdb\.com\/title\/(tt\d+)/i, function(m, p1){
+				changeUrl(p1);
+			});
+			val.replace(/subject\/(\d+)/i, function(m, p1){
+				changeDburl(p1);
+			});
 		});
 	} else {
 		console.log("Unsupported link");
