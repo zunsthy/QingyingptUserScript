@@ -297,7 +297,7 @@ function chooseLink(val){
 			sub.find("div[class^=game_area_sys_req]").each(function(){
 				if(this.dataset.os){
 					requirementarea += "[size=2][i][quote=" + this.dataset.os + "]" 
-						+ e(this.innerHTML.replace(/[\t ]+/g, '').replace(/\n\n+/g, '')).replace(/\[\/?list\]/ig, '')
+						+ e(this.innerHTML.replace(/\s+/g, '')).replace(/\[\/?list\]/ig, '')
 						+ "[/quote][/size][/i]";
 				} 
 			});
