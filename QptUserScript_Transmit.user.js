@@ -1,10 +1,12 @@
 // ==UserScript==
-// @name        QptUserScript_Transmit
+// @id          Qptuserscript_Transmit
+// @name        QptUserScript Transmit
+// @author      ZunSThy <zunsthy@gmail.com>
+// @version     0.5.5.20150406.135
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
-// @description	nothing useful
-// @version     0.5.5.2015090406.109
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
+// @description nothing useful
 // @domain      pt.hit.edu.cn
 // @match       http://pt.hit.edu.cn/edit.php*
 // @match       http://pt.hit.edu.cn/upload.php
