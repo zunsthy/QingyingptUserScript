@@ -17,6 +17,10 @@ https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScr
 
 https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_IgnoreBanner.user.js
 
+3.Scale torrents.php Image to 30% width of your screen
+
+https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_ScalePreviewImage.user.js
+
 Note
 ====
 Nothing useful, so you can be a partner to coding with me(us).
