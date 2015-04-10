@@ -1,8 +1,8 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @id          Qptuserscript_Transmit
 // @name        QptUserScript Transmit
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.5.5.20150406.135
+// @version     0.5.5.20150410.094
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
@@ -342,9 +342,7 @@ function chooseLink(val){
 
 var insert_tr = '<tr>'
 		+ '<td valign="top" align="right" class="rowhead nowrap">參考鏈接</td>'
-		+ '<td valign="top" align="left" class="rowfollow"><input type="text" name="name" id="reflink" style="width: 650px;"></td>'
-		+ '</tr><tr>'
-		+ '<td class="rowhead"></td><td valign="top" align="left" class="rowfollow">'
+		+ '<td valign="top" align="left" class="rowfollow"><input type="text" name="name" id="reflink" style="width: 650px;"><br />'
 		 + '<font class="medium">(僅只支持部份NexusPHP模板PT/BT站點、DZ論壇、Steam鏈接) ver0.0.0.1 <a class="link" href="sendmessage.php?receiver=1788">ZunSThy@清影PT</a>製作自20141009</font>'
 		 + '</td>'
 		+ '</tr>';
