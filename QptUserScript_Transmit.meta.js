@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Transmit
 // @name        QptUserScript Transmit
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.5.5.20150406.135
+// @version     0.5.5.20150412.123
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
