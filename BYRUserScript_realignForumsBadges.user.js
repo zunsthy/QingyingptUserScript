@@ -105,5 +105,5 @@ $(document).on('click', '.post_quote', function(){
 	compose[0].focus();
 }).on('click', '.post_give', function(){
 	var info = this.parentNode.dataset;
-	zOpenInner(info.u, info.uid, info.pid.match(/\d+/););
+	zOpenInner(info.u, info.uid, info.pid.match(/\d+/));
 });
