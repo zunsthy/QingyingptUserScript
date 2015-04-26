@@ -121,7 +121,11 @@ $(document).on('click', '.post_quote', function(){
 	compose[0].focus();
 }).on('click', '.post_give', function(){
 	var info = this.parentNode.dataset;
+<<<<<<< HEAD
 	zOpenInner(info.u, info.uid, info.pid);
 }).on('click', 'span.badges', function(){
 	window.open(this.dataset.link);
+=======
+	zOpenInner(info.u, info.uid, info.pid.match(/\d+/));
+>>>>>>> 880b39d1369fbfe23708079352dd2096dd6a3023
 });
