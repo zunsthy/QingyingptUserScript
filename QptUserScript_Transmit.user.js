@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Transmit
 // @name        QptUserScript Transmit
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.5.5.20150412.123
+// @version     0.5.5.20150430.135
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
@@ -87,14 +87,15 @@ function getLink(str){
 	});
 }
 
-function getHTML(val, callback){
+function getHTML(val, callback, options){
+	var header = (options ? options : {
+			'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
+			'Accept': 'application/atom+xml,application/xml,text/xml;q=0.9,*/*;q=0.8'
+ 		});
 	GM_xmlhttpRequest({
 		method: 'GET',
 		url: val,
-		headers: {
-			'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
-			'Accept': 'application/atom+xml,application/xml,text/xml'
- 		},
+		headers: header,
 		onload: function(response){
 			//console.log(response.responseText);
 			callback(response.responseText);
@@ -211,7 +212,7 @@ function chooseLink(val){
 			// descr = e(descr);
 			$("textarea#descr").val(descr);
 			getLink(doc);
-		});
+		}, {'User-agent': navigator.userAgent});
 	} else if(/https?:\/\/ccfbits\.org\/details\.php\?id=\d+/.test(val)){
 		console.log("CCF link");
 		getHTML(val, function(doc){
