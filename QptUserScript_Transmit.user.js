@@ -206,9 +206,9 @@ function chooseLink(val){
 				.replace(/\[([\S\s]+)\]/, "*$1");
 			changeSubtitle(subtitle);
 			var descr = sub.find("#kdescr")[0].innerHTML;
-			descr = e(descr).replace(/\[img\]imagecache\.php\?url=([^\[]+)\[\/img\]/, function(m, p1){
-				return ('[img]' + decodeURI(p1) + '[/img]');
-			});
+			descr = e(descr).replace(/\[img\]imagecache\.php\?url=([^\[]+)\[\/img\]/g, function(m, p1){
+				return ('[img]' + decodeURIComponent(p1) + '[/img]');
+			}).hsc_decode();
 			// descr = e(descr);
 			$("textarea#descr").val(descr);
 			getLink(doc);
