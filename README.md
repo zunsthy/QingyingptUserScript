@@ -21,6 +21,10 @@ https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScr
 
 https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_ScalePreviewImage.user.js
 
+4.Cure the illness called QIANGPOZHENG, if the odd number and the left alignment bother you.
+
+https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/BYRUserScript_realignForumsBadges.user.js
+
 Note
 ====
 Nothing useful, so you can be a partner to coding with me(us).
