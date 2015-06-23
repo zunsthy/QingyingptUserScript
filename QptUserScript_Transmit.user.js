@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Transmit
 // @name        QptUserScript Transmit
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.5.5.20150515.713
+// @version     0.5.5.20150623.623
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
@@ -55,12 +55,14 @@ function changeTitle(str){
 	if (/edit\.php/.test(document.location)) 
 		return;
 	if(str) console.log(str);
-	$('input#name').val(str.spaces2space().trim().hsc_decode());
+	$('input#name').val(str.spaces2space().trim().hsc_decode())
+		.trigger('change');
 }
 
 function changeSubtitle(str){
 	if(str) console.log(str);
-	$('input#small_descr').val(str.spaces2space().trim());
+	$('input#small_descr').val(str.spaces2space().trim())
+		.trigger('change');
 }
 
 function changeUrl(str){
@@ -339,6 +341,7 @@ function chooseLink(val){
 		console.log("Unsupported link");
  		return;
 	}
+
 }
 
 var insert_tr = '<tr>'
