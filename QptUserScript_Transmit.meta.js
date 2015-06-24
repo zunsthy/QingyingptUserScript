@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Transmit
 // @name        QptUserScript Transmit
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.5.5.20150623.623
+// @version     0.5.6.20150624.024
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
@@ -15,5 +15,4 @@
 // @include     http://pt.hit.edu.cn/upload.php
 // @include     http://pt.hit.edu.cn/uploadnew.php
 // @grant       GM_xmlhttpRequest
-// @require     http://pt.hit.edu.cn/jquerylib/jquery-1.7.2.min.js
 // ==/UserScript==
