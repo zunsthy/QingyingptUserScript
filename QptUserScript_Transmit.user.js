@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Transmit
 // @name        QptUserScript Transmit
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.5.6.20150624.024
+// @version     0.5.6.20150624.053
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
@@ -82,7 +82,7 @@ function changeDburl(str){
 
 function changeDescr(raw){
  	var str = e(raw).hsc_decode();
-	document.querySelector('textarea#descr').value = str.trim();
+	document.querySelector('textarea#descr').value = str.trim().hsc_decode();
 }
 
 function getLink(str){
@@ -331,7 +331,7 @@ function chooseLink(val){
 					descr = sub.querySelector('.pcbs td').innerHTML;
 			changeTitle(title);
 			descr = e(descr);
-			document.querySelector('textarea#descr').value = descr.replace(/----------------[\S\s]+/, "").trim();
+			document.querySelector('textarea#descr').value = descr.replace(/----------------[\S\s]+/, "").trim().hsc_decode();
 		});
 	} else if(/https?:\/\/.+?\/thread-\d+\-1\-1\.html/.test(val)){
 		console.log("DZ link");
