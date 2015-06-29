@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Transmit
 // @name        QptUserScript Transmit
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.5.6.20150624.053
+// @version     0.5.6.20150629.121
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
@@ -119,7 +119,7 @@ function newHTMLDom(htmlstring){
 
 function chooseLink(val){
 	console.log(val);
-  var old_descr = document.querySelector('textarea#descr').innerHTML.trim();
+  var old_descr = document.querySelector('textarea#descr').value.trim();
 	changeTitle("");
 	changeSubtitle("");
 	changeUrl("");
