@@ -11,9 +11,15 @@
 // @match       http://pt.hit.edu.cn/edit.php*
 // @match       http://pt.hit.edu.cn/upload.php
 // @match       http://pt.hit.edu.cn/uploadnew.php
+// @match       https://pt.hit.edu.cn/edit.php*
+// @match       https://pt.hit.edu.cn/upload.php
+// @match       https://pt.hit.edu.cn/uploadnew.php
 // @include     http://pt.hit.edu.cn/edit.php*
 // @include     http://pt.hit.edu.cn/upload.php
 // @include     http://pt.hit.edu.cn/uploadnew.php
+// @include     https://pt.hit.edu.cn/edit.php*
+// @include     https://pt.hit.edu.cn/upload.php
+// @include     https://pt.hit.edu.cn/uploadnew.php
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
 
