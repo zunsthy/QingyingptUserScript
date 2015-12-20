@@ -1,8 +1,8 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @id          Qptuserscript_Transmit
 // @name        QptUserScript Transmit
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.5.6.20150629.121
+// @version     0.5.6.20151220.512
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
@@ -99,19 +99,27 @@ function getLink(str){
 	});
 }
 
-function getHTML(val, callback, options){
+function getHTML(url, callback, options){
 	var header = (options ? options : {
 			'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
 			'Accept': 'application/atom+xml,application/xml,text/xml;q=0.9,*/*;q=0.8'
  		});
 	GM_xmlhttpRequest({
 		method: 'GET',
-		url: val,
+		url: url,
 		headers: header,
-		onload: function(response){
-			//console.log(response);
-			callback(response.responseText.match(/<body[^>]*>([\S\s]+)(<\/body>|$)/)[1]);
-		}
+    timeout: 1000,
+    onreadystatechange: function(response){
+// console.log(response.readyState, response.status);      
+      if(response.readyState == 4){
+        // console.log(response.responseText);
+        callback(response.responseText.match(/<body[^>]*>([\S\s]+)(<\/body>|$)/)[1]);
+      }
+    },
+    ontimeout: function(response){
+      // console.log(response);
+      console.info('timeout when request from url: ' + url);
+    },
  	});
 }
 
@@ -148,8 +156,31 @@ function chooseLink(val){
 			changeDescr(descr);
 			getLink(doc);
 		});
-	} else if(/https?:\/\/hdwing\.science\/details\.php\?id=\d+/.test(val)){
+	} else if(/https?:\/\/hdwing\.\w+\/details\.php\?id=\d+/.test(val)){
 		console.log("HDWinG link(HDWinG.ORG)");
+  } else if(/https?:\/\/hdchina\.club\/details\.php\?id=\d+/.test(val)){
+    console.log("HDChina link(<--old HDWinG <-- old HDChina)");
+    
+    getHTML(val, function(doc){
+      var sub = newHTMLDom(doc);
+      
+      [].forEach.call(sub.querySelectorAll('img[id^=attach]'), function(el){
+        el.removeAttribute('onmouseover');
+        el.removeAttribute('onclick');
+        if(/(^|^\/)attachments/.test(el.src)){
+          el.src = '//hdchina.club/' + el.src;
+        }
+      });
+      var el = sub.querySelector('h2#top'),
+          title = el.childNodes.item(0).data.trim(),
+          subtitle = el.nextElementSibling.innerHTML || '',
+          descr = sub.querySelector("#kdescr").innerHTML;
+
+      changeTitle(title);
+      changeSubtitle(subtitle);
+      changeDescr(descr);
+      getLink(doc);
+    });    
 	} else if(/https?:\/\/pt\.hit\.edu\.cn\/details\.php\?(hit=1&)?id=\d+/.test(val)){
 		console.log("QingyingPT link");
 
@@ -204,8 +235,9 @@ function chooseLink(val){
 		getHTML(val, function(doc){
 			var sub = newHTMLDom(doc);
 			[].forEach.call(sub.querySelectorAll('#kdescr>.bbcode img'), function(el){
-				if(/(^|^\/)attachments/.test(el.src))
+				if(/(^|^\/)attachments/.test(el.src)){
 					el.src = '//hudbt.hust.edu.cn/' + el.src;
+        }
 			});
 
 			var title = sub.querySelector('#page-title').innerHTML
@@ -277,7 +309,37 @@ function chooseLink(val){
 				}
 			});
 		});
-	} else if (/https?:\/\/([^\/]+?)\/details\.php\?id=\d+/.test(val)) {
+  } else if(/https?:\/\/pt\.whu\.edu\.cn\/details\.php\?id=\d+/.test(val)){
+    console.log("WHU link");
+    
+    getHTML(val, function(doc){
+      var sub = newHTMLDom(doc);
+      [].forEach.call(sub.querySelectorAll('#kdescr > .bbcode img'), function(el){
+        if(!!el.dataset['ksLazyload']){
+          el.src = el.dataset['ksLazyload'];
+        }
+        if(/(^|^\/)attachments/.test(el.src)){
+					el.src = '//pt.whu.edu.cn/' + el.src;
+        }
+      });
+
+      var title = sub.querySelector('#page-title').innerHTML
+						.replace(/<a[\S\s]+/, '').trim(),
+          subtitle = '',
+          descr = sub.querySelector('#kdescr > .bbcode').innerHTML;
+      
+      [].forEach.call(sub.querySelectorAll('dt'), function(el){ 
+				if(/副标题/.test(el.innerHTML)){
+					subtitle = el.nextElementSibling.innerHTML;
+				}
+			});
+      
+      changeTitle(title);
+      changeSubtitle(subtitle);
+			changeDescr(descr);
+			getLink(doc);
+    });
+	} else if(/https?:\/\/([^\/]+?)\/details\.php\?id=\d+/.test(val)){
 		console.log("NexusPHP link");
 
 		getHTML(val, function(doc) {
