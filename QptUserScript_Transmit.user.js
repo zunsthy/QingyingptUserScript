@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Transmit
 // @name        QptUserScript Transmit
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.5.7.131.1010
+// @version     0.5.7.133.1212
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
@@ -23,7 +23,7 @@
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
 
-var ver = "0.5.7.131.1010";
+var ver = "0.5.7.133.1212";
 
 // Powered by Mort(5787) & ZunSThy(1788)
 // Thanks for Mort2000@FDUPT
@@ -121,7 +121,10 @@ function requestHTML(url, callback, options){
 	requestData(url, function(response){
 // console.log(response.readyState, response.status);      
 		if(response.readyState == 4){
-			callback(response.responseText.match(/<body[^>]*>([\S\s]+)(<\/body>|$)/)[1]);
+			callback(response.responseText
+				.match(/<body[^>]*?>([\S\s]+)<\/body>/)[1]
+				.replace(/<script(\s|>)[\S\s]+?<\/script>/g, '')
+			);
 		}
 	}, function(response){
 // console.log(response);
@@ -180,7 +183,7 @@ function chooseLink(val){
     requestHTML(val, function(doc){
       var sub = newHTMLDom(doc);
       
-      [].forEach.call(sub.querySelectorAll('img[id^=attach]'), function(el){
+      Array.prototype.forEach.call(sub.querySelectorAll('img[id^=attach]'), function(el){
         el.removeAttribute('onmouseover');
         el.removeAttribute('onclick');
         if(/(^|^\/)attachments/.test(el.src)){
@@ -237,7 +240,7 @@ function chooseLink(val){
 
 		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc);
-			[].forEach.call(sub.querySelectorAll('#kdescr>.bbcode img'), function(el){
+			Array.prototype.forEach.call(sub.querySelectorAll('#kdescr>.bbcode img'), function(el){
 				if(/(^|^\/)attachments/.test(el.src)){
 					el.src = '//hudbt.hust.edu.cn/' + el.src;
         }
@@ -250,7 +253,7 @@ function chooseLink(val){
 			changeDescr(descr);
 			getLink(doc);
 
-			[].forEach.call(sub.querySelectorAll('dt'), function(el){ 
+			Array.prototype.forEach.call(sub.querySelectorAll('dt'), function(el){ 
 				if(/副标题/.test(el.innerHTML)){
 					var subtitle = el.nextElementSibling.innerHTML;
 					changeSubtitle(subtitle);
@@ -275,7 +278,7 @@ function chooseLink(val){
 
 		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc);
-			[].forEach.call(sub.querySelectorAll('#kdescr img'), function(el){
+			Array.prototype.forEach.call(sub.querySelectorAll('#kdescr img'), function(el){
 				el.src = decodeURIComponent(el.src.replace(/.*imagecache\.php\?url=([^\[]+)/, "$1"));
 			});
 
@@ -286,7 +289,7 @@ function chooseLink(val){
 			changeDescr(descr);
 			getLink(doc);
 
-			[].forEach.call(sub.querySelectorAll('td.rowhead'), function(el){ 
+			Array.prototype.forEach.call(sub.querySelectorAll('td.rowhead'), function(el){ 
 				if(/副標題/.test(el.innerHTML)){
 					var subtitle = el.nextElementSibling.innerHTML
 						.replace(/\[([\S\s]+)\]/, "*$1");
@@ -305,7 +308,7 @@ function chooseLink(val){
 			changeTitle(title);
 			changeDescr(descr);
 
-			[].forEach.call(sub.querySelectorAll('td.rowhead'), function(el){ 
+			Array.prototype.forEach.call(sub.querySelectorAll('td.rowhead'), function(el){ 
 				if(/中文名称/.test(el.innerHTML)){
 					var subtitle = el.nextElementSibling.innerHTML;
 					changeSubtitle(subtitle);
@@ -317,7 +320,7 @@ function chooseLink(val){
     
     requestHTML(val, function(doc){
       var sub = newHTMLDom(doc);
-      [].forEach.call(sub.querySelectorAll('#kdescr > .bbcode img'), function(el){
+      Array.prototype.forEach.call(sub.querySelectorAll('#kdescr > .bbcode img'), function(el){
         if(!!el.dataset['ksLazyload']){
           el.src = el.dataset['ksLazyload'];
         }
@@ -331,7 +334,7 @@ function chooseLink(val){
           subtitle = '',
           descr = sub.querySelector('#kdescr > .bbcode').innerHTML;
       
-      [].forEach.call(sub.querySelectorAll('dt'), function(el){ 
+      Array.prototype.forEach.call(sub.querySelectorAll('dt'), function(el){ 
 				if(/副标题/.test(el.innerHTML)){
 					subtitle = el.nextElementSibling.innerHTML;
 				}
@@ -342,13 +345,39 @@ function chooseLink(val){
 			changeDescr(descr);
 			getLink(doc);
     });
+	} else if(/https?:\/\/www\.hdarea\.co\/details\.php\?id=\d+/.test(val)){
+		console.log('HDArea link');
+		
+		requestHTML(val, function(doc){
+			var sub = newHTMLDom(doc);			
+			var hdarealogo = 'http://www.hdarea.co/attachments/201605/20160517115442b44bbbc7dce459dfa136c0f37b9ebce3.png';
+			Array.prototype.forEach.call(sub.querySelectorAll('img[src="' + hdarealogo + '"]'), function(el){
+				el.parentNode.removeChild(el);
+			});
+			var title = sub.querySelector('h1#top[align="center"]').innerHTML
+						.replace(/([^<]+)<[\S\s]+/, "$1")
+						.replace(/&nbsp;/g, '')
+						.trim(),
+					descr = sub.querySelector('#kdescr').innerHTML;
+
+			changeTitle(title);
+			changeDescr(descr);
+			getLink(doc);
+			
+			Array.prototype.forEach.call(sub.querySelectorAll('td.rowhead'), function(el){ 
+				if(/副标题/.test(el.innerHTML)){
+					var subtitle = el.nextElementSibling.innerHTML;
+					changeSubtitle(subtitle);
+				}
+			});
+		});
 	} else if(/https?:\/\/([^\/]+?)\/details\.php\?id=\d+/.test(val)){
 		console.log("NexusPHP link");
 
 		requestHTML(val, function(doc) {
 			var sub = newHTMLDom(doc);
 			var el = sub.querySelector('#ad_torrentdetail');
-			el.parentNode.removeChild(el);
+			el && el.parentNode.removeChild(el);
 
 			var title = sub.querySelector('#top').innerHTML
 						.replace(/([^<]+)<[\S\s]+/, "$1").trim(),
@@ -357,7 +386,7 @@ function chooseLink(val){
 			changeDescr(descr);
 			getLink(doc);
 
-			[].forEach.call(sub.querySelectorAll('td.rowhead'), function(el){ 
+			Array.prototype.forEach.call(sub.querySelectorAll('td.rowhead'), function(el){ 
 				if(/副标题/.test(el.innerHTML)){
 					var subtitle = el.nextElementSibling.innerHTML;
 					changeSubtitle(subtitle);
@@ -370,13 +399,13 @@ function chooseLink(val){
 		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc),
 					linkpre = "//bt.neu6.edu.cn";
-			[].forEach.call(sub.querySelectorAll('.pcbs div[id][id^=aimg]'), function(el){
+			Array.prototype.forEach.call(sub.querySelectorAll('.pcbs div[id][id^=aimg]'), function(el){
 				el.parentNode.removeChild(el);
 			});
-			[].forEach.call(sub.querySelectorAll('.pcbs img[id][id^=aimg][file^="/data/attachment"]'), function(el){
+			Array.prototype.forEach.call(sub.querySelectorAll('.pcbs img[id][id^=aimg][file^="/data/attachment"]'), function(el){
 				el.src = linkpre + el.getAttribute('file');
 			});
-			[].forEach.call(sub.querySelectorAll('.pcbs img[src^="static"]'), function(el){
+			Array.prototype.forEach.call(sub.querySelectorAll('.pcbs img[src^="static"]'), function(el){
 				el.parentNode.removeChild(el);
 			});
 
@@ -424,13 +453,13 @@ function chooseLink(val){
 					linkpre = '//cdn.akamai.steamstatic.com/steam/apps/' + appid + '/';
 
 			var imgs = [];
-			[].forEach.call(sub.querySelectorAll(".screenshot_holder>a"), function(el){
+			Array.prototype.forEach.call(sub.querySelectorAll(".screenshot_holder>a"), function(el){
 				imgs.push(el.dataset.screenshotid);
 			});
 			var imgarea = "\n[img]" + linkpre + imgs.join("[/img]\n[img]"+linkpre) + "[/img]\n";
 
 			var requirementarea = "";
-			[].forEach.call(sub.querySelectorAll('div[class^=game_area_sys_req]'), function(el){
+			Array.prototype.forEach.call(sub.querySelectorAll('div[class^=game_area_sys_req]'), function(el){
 				if(el.dataset.os){
 					requirementarea += "[size=2][i][quote=" + el.dataset.os + "]" 
 						+ e(el.innerHTML.replace(/\s+/g, '')).replace(/\[\/?list\]/ig, '')
