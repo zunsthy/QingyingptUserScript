@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Transmit
 // @name        QptUserScript Transmit
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.5.7.129.2216
+// @version     0.5.7.131.1010
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
@@ -100,28 +100,41 @@ function getLink(str){
 	});
 }
 
-function getHTML(url, callback, options){
-	var header = (options ? options : {
-			'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
-			'Accept': 'application/atom+xml,application/xml,text/xml;q=0.9,*/*;q=0.8'
- 		});
+function requestData(url, successHandle, timeoutHandle, options){
+	var headers = options ? options : {
+			'User-Agent': navigator.userAgent,
+			'Accept': '"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"'
+ 		};
 	GM_xmlhttpRequest({
 		method: 'GET',
 		url: url,
-		headers: header,
-    timeout: 1000,
-    onreadystatechange: function(response){
+		headers: headers,
+		timeout: 2048,
+		onreadystatechange: successHandle,
+		ontimeout: timeoutHandle,
+	});
+}
+
+function requestHTML(url, callback, options){
+	requestData(url, function(response){
 // console.log(response.readyState, response.status);      
-      if(response.readyState == 4){
-        // console.log(response.responseText);
-        callback(response.responseText.match(/<body[^>]*>([\S\s]+)(<\/body>|$)/)[1]);
-      }
-    },
-    ontimeout: function(response){
-      // console.log(response);
-      console.info('timeout when request from url: ' + url);
-    },
- 	});
+		if(response.readyState == 4){
+			callback(response.responseText.match(/<body[^>]*>([\S\s]+)(<\/body>|$)/)[1]);
+		}
+	}, function(response){
+// console.log(response);
+		console.info('timeout when request from url: ' + url);
+	}, options);
+}
+
+function requestJson(url, callback, options){
+	requestData(url, function(response){
+		if(response.readyState == 4){
+			callback(JSON.parse(response.responseText));
+		}
+	}, function(response){
+		console.info('timeout when request from url: ' + url);
+	}, options);
 }
 
 function newHTMLDom(htmlstring){
@@ -143,7 +156,7 @@ function chooseLink(val){
 	if(/https?:\/\/totheglory.im\/t\/\d+\//.test(val)){
 		console.log("TTG link");
 
-		getHTML(val, function(doc){
+		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc),
 					title = sub.querySelector('h1').innerHTML,
 					descr = sub.querySelector('#kt_d').innerHTML;
@@ -162,7 +175,7 @@ function chooseLink(val){
   } else if(/https?:\/\/hdchina\.club\/details\.php\?id=\d+/.test(val)){
     console.log("HDChina link(<--old HDWinG <-- old HDChina)");
     
-    getHTML(val, function(doc){
+    requestHTML(val, function(doc){
       var sub = newHTMLDom(doc);
       
       [].forEach.call(sub.querySelectorAll('img[id^=attach]'), function(el){
@@ -182,37 +195,24 @@ function chooseLink(val){
       changeDescr(descr);
       getLink(doc);
     });    
-	} else if(/https?:\/\/pt\.hit\.edu\.cn\/details\.php\?(hit=1&)?id=\d+/.test(val)){
+	} else if(/https?:\/\/pt\.hit\.edu\.cn\/details\.php/.test(val)
+			|| /https?:\/\/pt\.hit\.edu\.cn\/details_for_mod\.php/.test(val)){
 		console.log("QingyingPT link");
 
-		getHTML(val, function(doc) {
-			var sub = newHTMLDom(doc);
-			var el = sub.querySelector('#ad_torrentdetail');
-			el.parentNode.removeChild(el);
-			el = sub.querySelector('fieldset:first-of-type');
-			el.parentNode.removeChild(el);
-			el = sub.querySelector('fieldset:first-of-type');
-			el.parentNode.removeChild(el);
-
-			var title = sub.querySelector('#top').innerHTML
-						.replace(/([^<]+)<[\S\s]+/, "$1").trim(),
-					descr = sub.querySelector("#kdescr").innerHTML;
-
-			changeTitle(title);
-			getLink(doc);
-			changeDescr(descr);
-
-			[].forEach.call(sub.querySelectorAll('td.rowhead'), function(el){ 
-				if(/副标题/.test(el.innerHTML)){
-					var subtitle = el.nextElementSibling.innerHTML;
-					changeSubtitle(subtitle);
-				}
-			});
+		var id = parseInt(val.match(/id=(\d+)/)[1], 10),
+				jsonUrl = location.protocol + '//pt.hit.edu.cn/details.php?from=js&id=' + id;
+		requestJson(jsonUrl, function(data){
+			var info = data.passToClient.information;
+			changeTitle(info['name']);
+			changeSubtitle(info['small_descr']);
+			changeDescr(info['descr']);
+			info['imdbid'] && changeUrl('http://www.imdb.com/title/tt' + info['imdbid'] + '/');
+			info['dbid'] && changeDburl('https://movie.douban.com/subject/' + info['dbid'] + '/');
 		});
 	} else if (/https?:\/\/pt\.hit\.edu\.cn\/edit\.php\?(returnto=.+&)*id=\d+/.test(val)) {
 		console.log("QingyingPT link");
 
-		getHTML(val, function(doc){
+		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc),
 					title = sub.querySelector('input#name').value,
 					subtitle = sub.querySelector('input#small_descr').value,
@@ -233,7 +233,7 @@ function chooseLink(val){
 	} else if (/https?:\/\/hudbt\.hust\.edu\.cn\/details\.php\?id=\d+/.test(val)) {
 		console.log("HUD link");
 
-		getHTML(val, function(doc){
+		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc);
 			[].forEach.call(sub.querySelectorAll('#kdescr>.bbcode img'), function(el){
 				if(/(^|^\/)attachments/.test(el.src)){
@@ -258,7 +258,7 @@ function chooseLink(val){
 	} else if(/https?:\/\/bt\.byr\.cn\/details\.php\?id=\d+/.test(val)){
 		console.log("BYR link");
 
-		getHTML(val, function(doc){
+		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc);
 
 			var title = sub.querySelector('#share').innerHTML
@@ -271,7 +271,7 @@ function chooseLink(val){
 	} else if(/https?:\/\/tp\.m\-team\.cc\/details\.php\?id=\d+/.test(val)){
 		console.log("M-team link");
 
-		getHTML(val, function(doc){
+		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc);
 			[].forEach.call(sub.querySelectorAll('#kdescr img'), function(el){
 				el.src = decodeURIComponent(el.src.replace(/.*imagecache\.php\?url=([^\[]+)/, "$1"));
@@ -295,7 +295,7 @@ function chooseLink(val){
 	} else if(/https?:\/\/ccfbits\.org\/details\.php\?id=\d+/.test(val)){
 		console.log("CCF link");
 
-		getHTML(val, function(doc){
+		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc);
 
 			var title = sub.querySelector("h1").innerHTML,
@@ -313,7 +313,7 @@ function chooseLink(val){
   } else if(/https?:\/\/pt\.whu\.edu\.cn\/details\.php\?id=\d+/.test(val)){
     console.log("WHU link");
     
-    getHTML(val, function(doc){
+    requestHTML(val, function(doc){
       var sub = newHTMLDom(doc);
       [].forEach.call(sub.querySelectorAll('#kdescr > .bbcode img'), function(el){
         if(!!el.dataset['ksLazyload']){
@@ -343,7 +343,7 @@ function chooseLink(val){
 	} else if(/https?:\/\/([^\/]+?)\/details\.php\?id=\d+/.test(val)){
 		console.log("NexusPHP link");
 
-		getHTML(val, function(doc) {
+		requestHTML(val, function(doc) {
 			var sub = newHTMLDom(doc);
 			var el = sub.querySelector('#ad_torrentdetail');
 			el.parentNode.removeChild(el);
@@ -365,7 +365,7 @@ function chooseLink(val){
 	} else if(/https?:\/\/bt\.neu6\.edu\.cn\/thread-\d+\-1\-1\.html/.test(val)){
 		console.log("6V link");
 
-		getHTML(val, function(doc){
+		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc),
 					linkpre = "//bt.neu6.edu.cn";
 			[].forEach.call(sub.querySelectorAll('.pcbs div[id][id^=aimg]'), function(el){
@@ -388,7 +388,7 @@ function chooseLink(val){
 	} else if(/http:\/\/bbs\.3dmgame\.com\/thread\-\d+\-1\-1\.html/.test(val)){
 		console.log("3DMGame link");
 		
-		getHTML(val, function(doc){
+		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc);
 			var el = sub.querySelector('.pcbs td .quote:first-of-type');
 			el.parentNode.removeChild(el);
@@ -404,7 +404,7 @@ function chooseLink(val){
 	} else if(/https?:\/\/.+?\/thread-\d+\-1\-1\.html/.test(val)){
 		console.log("DZ link");
 
-		getHTML(val, function(doc){
+		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc);
 
 			var title = sub.querySelector('#thread_subject').innerHTML;
@@ -416,7 +416,7 @@ function chooseLink(val){
 	} else if(/https?:\/\/store\.steampowered\.com\/app\/\d+/.test(val)){
 		console.log("Steam Store");
 
-		getHTML(val, function(doc){
+		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc),
 					appid = val.match(/\/(\d+)\//)[1], 
 					linkpre = '//cdn.akamai.steamstatic.com/steam/apps/' + appid + '/';
@@ -449,7 +449,7 @@ function chooseLink(val){
 	} else if(/(http:\/\/)?movie\.douban\.com\/subject\/\d\d+/.test(val)){
 		console.log("Douban Movie");
 
-		getHTML(val, function(doc){
+		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc);
 
 			var title = sub.querySelector("h1>span").innerHTML,
