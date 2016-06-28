@@ -23,6 +23,8 @@
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
 
+var ver = "0.5.7.131.1010";
+
 // Powered by Mort(5787) & ZunSThy(1788)
 // Thanks for Mort2000@FDUPT
 // 希望使用清影腳本或樣式代碼的網站或個人標明出自ZunSThy@清影PT
@@ -474,7 +476,7 @@ function chooseLink(val){
 var insert_tr = document.createElement('tr');
 insert_tr.innerHTML = '<td valign="top" align="right" class="rowhead nowrap">參考鏈接</td>'
 		+ '<td valign="top" align="left" class="rowfollow"><input type="text" id="reflink" style="width: 650px;"><br />'
-		 + '<font class="medium">(僅只支持部份NexusPHP模板PT/BT站點、DZ論壇、Steam鏈接) ver0.0.0.1 <a class="link" href="sendmessage.php?receiver=1788">ZunSThy@清影PT</a>製作自20141009</font>'
+		 + '<font class="medium">(僅只支持部份NexusPHP模板PT/BT站點、DZ論壇、Steam鏈接) ver' + ver + ' by <a style="color: #e6e600;" href="sendmessage.php?receiver=1788">ZunSThy@清影PT</a> 製作自2014.10.10</font>'
 		 + '</td>';
 
 var position = document.querySelector('form tr:nth-child(' + (location.pathname.match(/edit\.php/) ? 2 : 4) + ')');
