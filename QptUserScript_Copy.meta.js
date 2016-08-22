@@ -4,7 +4,7 @@
 // @author      ZunSThy <zunsthy@gmail.com>
 // @version     0.1.822.1010
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
-// @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/Qptuserscript_Copy.meta.js
+// @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Copy.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Copy.user.js
 // @description nothing useful
 // @match       http://pt.hit.edu.cn/forums.php?action=viewtopic*
