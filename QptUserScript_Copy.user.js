@@ -95,7 +95,7 @@ function copyText(text){
 			area = document.createElement('textarea');
 
 	area.setAttribute('readOnly', '');
-	area.className = 'my-copy-textarea';
+	area.className = `${prefix}-copy-textarea`;
 	area.value = text;
 
 	body.insertBefore(area, document.body.firstChild);
