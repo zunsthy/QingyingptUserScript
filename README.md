@@ -25,6 +25,9 @@ Scripts
 1. Copy specified text from posts (only support email text now).
   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Copy.user.js 
 
+1. Change Qingying PT's forum style. (incomplete)
+  https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Forum.user.js
+
 Note
 ====
 Nothing useful. So you can code with me/us.
