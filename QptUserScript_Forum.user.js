@@ -14,13 +14,13 @@
 // @grant       none
 // ==/UserScript==
 
+(function(){
+'use strict';
 const prefix = 'qpt',
       ver = '0.1.264.1010';
 
-(function(){
-
-const body = document.body || document.getElementsByTagName('body')[0], // ??
-      head = document.head || document.getElementsByTagName('head')[0];
+const head = document.head || document.getElementsByTagName('head')[0],
+      body = document.body;
 
 const customCSS = `
 /* for container */
@@ -197,7 +197,6 @@ a.forum-link:hover {
   margin-right: 10px;
   border-right: 1px solid #eaeaea;
 }
-.post-left,
 .t-avartar {
   text-align: left;
 }
@@ -298,6 +297,9 @@ a.forum-link:hover {
   position: absolute;
   top: 21px;
   right: 10px;
+}
+.gifts-list.show {
+  display: block;
 }
 .gifts-list > table {
   margin: 0;
@@ -419,8 +421,8 @@ ul.reply-functions > li.active {
       decode = (str) => decodeURIComponent(str.replace(pl, ' ')),
       query = window.location.search.substring(1);
 
-  let urlParams = {};
-  while(match = search.exec(query)){
+  const urlParams = {};
+  while((match = search.exec(query))){
     urlParams[decode(match[1])] = decode(match[2]);
   }
   window.urlParams = urlParams;
@@ -436,6 +438,43 @@ const listenerCreator = (root, selector, type, handle) => {
   });
 };
 
+const fakeFormSubmit = (url, options, method) => {
+  const form = document.createElement('form');
+  form.setAttribute('method', method ? method.toLowerCase() : 'post');
+  form.setAttribute('action', url);
+  form.classList.add('hide');
+
+  Object.keys(options).forEach((name) => {
+    const field = document.createElement('input');
+    field.setAttribute('type', 'hidden');
+    field.setAttribute('name', name);
+    field.setAttribute('value', options[name]);
+    form.appendChild(field);
+  });
+
+  body.appendChild(form);
+  form.submit();
+};
+
+const ajaxFormSubmit = (url, options, method, cb) => {
+  method = method.toUpperCase() === 'POST' ? 'POST' : 'GET';
+  const data = options
+    ? options instanceof Object
+    ? Object.keys(options).map((name) => !name ? '' : (encodeURIComponent(name) + '=' + encodeURIComponent(options[name]))).filter((s) => !!s).join('&')
+    : `${options}`
+    : '';
+  const xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = () => (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200 && cb(xhr.responseText, xhr.response));
+  if(method === 'POST') {
+    xhr.open(method, url);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send(data);
+  } else {
+    xhr.open(method, data ? `${url}?${data}` : url);
+    xhr.send();
+  }
+};
+
 const rGifts = /\[bonus\]([^\[]+)\[b_sp\](\d+)/g;
 const rGift = /\[bonus\]([^\[]+)\[b_sp\](\d+)/;
 const statiticsGifts = (str) => {
@@ -446,12 +485,11 @@ const statiticsGifts = (str) => {
 };
 
 const rLinks = new RegExp('((?:(?:[a-z][a-z\\d+\\-.]*:\\/{2}(?:(?:[a-z0-9\\-._~\\!$&\'*+,;=:@|]+|%[\\dA-F]{2})+|[0-9.]+|\\[[a-z0-9.]+:[a-z0-9.]+:[a-z0-9.:]+\\])(?::\\d*)?(?:\\/(?:[a-z0-9\\-._~\\!$&\'*+,;=:@|]+|%[\\dA-F]{2})*)*(?:\\?(?:[a-z0-9\\-._~\\!$&\'*+,;=:@\\/?|]+|%[\\dA-F]{2})*)?(?:#(?:[a-z0-9\\-._~\\!$&\'*+,;=:@\\/?|]+|%[\\dA-F]{2})*)?)|(?:www\\.(?:[a-z0-9\\-._~\\!$&\'*+,;=:@|]+|%[\\dA-F]{2})+(?::\\d*)?(?:\\/(?:[a-z0-9\\-._~\\!$&\'*+,;=:@|]+|%[\\dA-F]{2})*)*(?:\\?(?:[a-z0-9\\-._~\\!$&\'*+,;=:@\\/?|]+|%[\\dA-F]{2})*)?(?:#(?:[a-z0-9\\-._~\\!$&\'*+,;=:@\\/?|]+|%[\\dA-F]{2})*)?)))', 'g');
-const rEmails = new RegExp('((?:[\\w\!\#$\%\&\'\*\+\-\/\=\?\^\`{\|\}\~]+\.)*(?:[\\w\!\#$\%\'\*\+\-\/\=\?\^\`{\|\}\~]|&)+@(?:(?:(?:(?:(?:[a-z0-9]{1}[a-z0-9\-]{0,62}[a-z0-9]{1})|[a-z])\.)+[a-z]{2,6})|(?:\\d{1,3}\.){3}\\d{1,3}(?:\:\\d{1,5})?))', 'g');
+// const rEmails = new RegExp('((?:[\\w\!\#$\%\&\'\*\+\-\/\=\?\^\`{\|\}\~]+\.)*(?:[\\w\!\#$\%\'\*\+\-\/\=\?\^\`{\|\}\~]|&)+@(?:(?:(?:(?:(?:[a-z0-9]{1}[a-z0-9\-]{0,62}[a-z0-9]{1})|[a-z])\.)+[a-z]{2,6})|(?:\\d{1,3}\.){3}\\d{1,3}(?:\:\\d{1,5})?))', 'g');
 
 const encUriChars = (str) => str.replace(/"/g, '%22').replace(/'/g, '%27').replace(/\(/g, '%28').replace(/\)/g, '%29').replace(/\*/g, '%2A');
 
 const formatBBcode = (() => {
-  'use strict';
   const noConflict = `-z-${Date.now()}-`;
   const emotionUriPrefix = '/pic/smiles/';
 
@@ -464,10 +502,10 @@ const formatBBcode = (() => {
     del: (_, content) => `<del class="bbcode bbcode-s">${content}</del>`,
     color(params, content) {
       let color = '', ms;
-      if(ms = params.match(/(#([a-f0-9]{3}){1,2})$/i)) {
-        color = ms ? ms[1] : '';
-      } else if(ms = params.match(/^(\w+)/)) {
-        color = ms ? ms[1] : '';
+      if((ms = params.match(/(#([a-f0-9]{3}){1,2})$/i))) {
+        color = ms[1] || '';
+      } else if((ms = params.match(/^(\w+)/))) {
+        color = ms[1] || '';
       }
       return color ? `<span class="bbcode bbcode-color" data-bbcode-color="${color}" style="color: ${color}">${content}</span>` : content;
     },
@@ -487,7 +525,7 @@ const formatBBcode = (() => {
         url = params;
         content = url;
       } else if(!params) {
-        if(!/(\r|\n|\r\n)/.test(content) && content.match(rLinks)) {
+        if(!/\n/.test(content) && content.match(rLinks)) {
           url = content.match(rLinks)[0];
         } else {
           valid = false;
@@ -496,7 +534,7 @@ const formatBBcode = (() => {
         url = params;
       }
       if(url) {
-        url = encUriChars(url); 
+        url = encUriChars(url);
       }
       return valid ? `<span class="bbcode bbcode-link" data-bbcode-link="${url}"><a href="${url}" target="_blank">${content}</a></span>` : content;
     },
@@ -506,7 +544,7 @@ const formatBBcode = (() => {
         src = params;
       } else if(!params) {
         src = content.trim();
-        if(/(\r|\n|\r\n| )/.test(src) || !src.match(rLinks)) {
+        if(/(\n| )/.test(src) || !src.match(rLinks)) {
           valid = false;
         }
       } else {
@@ -538,12 +576,12 @@ const formatBBcode = (() => {
     pre: (_, content) => `<pre class="bbcode bbcode-pre">${content}</pre>`,
     code: (params, content) => `<pre class="bbcode bbcode-code"><code class="${params || ''}">${content.replace(/(^(&#10;)+|(&#10;)+$)/g, '')}</code></pre>`,
     noparse: (_, content) => `<samp class="bbcode bbcode-noparse">${content}</samp>`,
-    flash: () => `<em>暂时不支持flash插入</em>`,
-    flv: () => `<em>暂时不支持flv视频插入</em>`,
-    video: () => `<em>暂时不支持视频插入</em>`,
-    site: () => `<span class="bbcode bbcode-site"></span>`,
-    siteurl: () => `<span class="bbcode bbcode-siteurl">https://pt.hit.edu.cn</span>`,
-    siteimg: () => `<span class="bbcode bbcode-siteimg"><img src="/styles/login/logo.png"></span>`,
+    flash: () => '<em>暂时不支持flash插入</em>',
+    flv: () => '<em>暂时不支持flv视频插入</em>',
+    video: () => '<em>暂时不支持视频插入</em>',
+    site: () => '<span class="bbcode bbcode-site"></span>',
+    siteurl: () => '<span class="bbcode bbcode-siteurl">https://pt.hit.edu.cn</span>',
+    siteimg: () => '<span class="bbcode bbcode-siteimg"><img src="/styles/login/logo.png"></span>',
   };
 
   const noparseTags = ['pre', 'code', 'noparse'];
@@ -552,7 +590,7 @@ const formatBBcode = (() => {
 
   const renderPlain = (str) => str ? str
     .replace(/\[em(\d+)\]/g, (em, num) => `<img class="bbocde emotion" src="${emotionUriPrefix}${num}.gif">`)
-    .replace(/(\r\n|\r|\n)/g, '<br />')
+    .replace(/\n/g, '<br />')
     : '';
 
   const rDep = new RegExp(`(${noConflict})(\\d+)`);
@@ -561,6 +599,8 @@ const formatBBcode = (() => {
   const rSingleTags = new RegExp(`\\[(${singleTags.join('|')})([ ,=][^\\]]*?)?\\]`, 'gi');
   const rNotListTag = /\[(?!\*\]|list([ =][^\]]*)?\]|\/list\])/gi;
   const rListTag = /\[(?=list([ =][^\]]*)?\]|\/list\])/gi;
+
+  const rNoTag = new RegExp(`\\[(?!\\/?(?:${singleTags.concat(closureTags).filter((v, i, arr) => (i === arr.indexOf(v))).concat('\\*').join('|')}))([^\\]]*?)\\]`, 'gi');
 
   const rBBClosure = new RegExp(`<${noConflict}(\\d+) (${closureTags.join('|')})([ ,=][^>]*?)?>([\\S\\s]*?)<${noConflict}\\1 /\\2>`, 'gi');
   const rBBSingle = new RegExp(`\{(${singleTags.join('|')})([ ,=][^\\]]*?)?\}`, 'gi');
@@ -574,7 +614,8 @@ const formatBBcode = (() => {
     + (tag.match(rDep) ? tag.replace(rDep, (_s__, p1, p2) => `${p1}${1 + parseInt(p2, 10)}`) : `${noConflict}0 ${tag}`)
     + '>')));
 
-  const preprocessNoparse = (str) => str.replace(rNoparseTags, (s, tag, params, content) => `[${tag}]${content.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;').replace(/\{/g, '&#123;').replace(/\}/g, '&#125;').replace(/(\r\n|\r|\n)/g, '&#10;')}[/${tag}]`);
+  const preprocessNoTag = (str) => str.replace(rNoTag, (_, m1) => `&#91;${m1}&#93;`);
+  const preprocessNoparse = (str) => str.replace(rNoparseTags, (s, tag, params, content) => `[${tag}]${content.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;').replace(/\{/g, '&#123;').replace(/\}/g, '&#125;').replace(/\n/g, '&#10;')}[/${tag}]`);
   const preprocessList = (str) => {
     let text = str.replace(rNotListTag, '>').replace(rListTag, '<');
     while(text !== (text = xList(text)));
@@ -598,7 +639,7 @@ const formatBBcode = (() => {
     return handle ? handle(params ? params.slice(1).trim() : undefined, undefined, true) : '';
   });
 
-  return (str) => renderPlain(processSingleTag(processClosureTag(preprocessSingleTag(preprocessClosureTag(preprocessList(preprocessNoparse(str)))))));
+  return (str) => renderPlain(processSingleTag(processClosureTag(preprocessSingleTag(preprocessClosureTag(preprocessList(preprocessNoparse(preprocessNoTag(str))))))));
 })();
 
 const exBBcode = (str) => {
@@ -607,7 +648,8 @@ const exBBcode = (str) => {
     .replace(/\{/g, '&#123;')
     .replace(/\}/g, '&#125;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/>/g, '&gt;')
+    .replace(/\r\n|\r|\n/g, '\n');
 
   return formatBBcode(res);
 };
@@ -617,7 +659,7 @@ const nativeTreeWalker = (root, walkerFunc) => {
 			node,
 			textNodes = [];
 
-	while(node = walker.nextNode()){
+	while((node = walker.nextNode())) {
 		textNodes.push(node);
 	}
 
@@ -630,7 +672,7 @@ const renderLinks = (nodes) => {
     const p = textNode.parentNode;
     if(p.tagName !== 'A') {
       const span = document.createElement('span');
-      const text = textNode.nodeValue; 
+      const text = textNode.nodeValue;
       // if(text.match(rLinks) || text.match(rEmails)) {
       if(text.match(rLinks)) {
         // span.innerHTML = text.replace(/</g, '&lt;'/* XSS */).replace(rLinks, (l) => `<a class="render-link" target="_blank" href="${l}">${l}</a>`).replace(rEmails, (m) => `<a class="render-mail" target="_top" href="mailto:${m}"><em>${m}</em></a>`);
@@ -643,14 +685,14 @@ const renderLinks = (nodes) => {
 };
 
 const pageTopic = (data) => {
-  // 'use strict';
   const posts = data['forumsInfo'],
       users = data['posters'],
       me = data['me'],
       info = data['otherInfo'],
       sections = data['forumsPlates'],
-      addons = data['musicaddon'],
-      topicid = info['topicid'] || window.urlParams['topicid'];
+      // addons = data['musicaddon'],
+      topicid = info['topicid'] || window.urlParams['topicid'],
+      forumid = info['forumid'] || window.urlParams['forumid'];
 
   const holder = document.getElementById('outer');
   holder.removeChild(holder.firstChild);
@@ -661,10 +703,10 @@ const pageTopic = (data) => {
   const link0 = `/forums.php?action=viewforum&forumid=${info['forumid']}`,
         link = `/forums.php?action=viewtopic&topicid=${topicid}&page=`;
 
-  let cTitleLine, cPagination, cOperateArea, cReplyArea, cGifts, repeatPage, repeatSection, repeatColor;
+  let cTitleLine, cPagination, cOperateArea, cReplyArea, cContent, cGifts, repeatPage, repeatSection, repeatColor;
 
   cTitleLine = () => {
-    let container = document.createElement('header');
+    const container = document.createElement('header');
     container.className = 'header-section';
     container.innerHTML = `
 <section class="line">
@@ -706,10 +748,13 @@ const pageTopic = (data) => {
   `;
 
   cOperateArea = () => `
-<button class="op-button sticky">置顶</button>
-<button class="op-button lock">锁定</button>
+<button class="op-button sticky">${info['sticky'] === 'yes' ? '取消置顶' : '置顶'}</button>
+<button class="op-button lock">${info['locked'] === 'yes' ? '取消锁定' : '锁定'}</button>
 <button class="op-button delete">删除</button>
-<select class="op-select moveto" name="moveto">${repeatSection()}</select>
+<select class="op-select moveto" name="moveto">
+  <option value="" hidden />
+  ${repeatSection()}
+</select>
 <button class="op-button moveto">移动</button>
 <select class="op-select hl" name="hl">${repeatColor()}</select>
 <button class="op-button hl">高亮</button>
@@ -719,7 +764,7 @@ const pageTopic = (data) => {
     ? (p === cur)
     ? `<li class="item"><a class="f-link current active" href="#">${p}</a>`
     : `<li class="item"><a class="f-link" href="${link + (p - 1)}">${p}</a>`
-    : `<li class="item"><span>...</span></li>`
+    : '<li class="item"><span>...</span></li>'
   ).join('');
 
   repeatSection = () => Object.keys(sections).map((sectionId) => `
@@ -754,10 +799,10 @@ const pageTopic = (data) => {
   `;
 
   cContent = () => {
-    let container = document.createElement('section');
+    const container = document.createElement('section');
     container.className = 'content-section';
     container.innerHTML = posts.map((post) => {
-      let user = users[post['posterid']] || {
+      const user = users[post['posterid']] || {
         id: 0,
         username: '(该用户不存在)',
         title: '',
@@ -768,8 +813,8 @@ const pageTopic = (data) => {
         enabled: 'no',
         modifier: 'no',
       };
-      let gifts = statiticsGifts(post['body']);
-      let giftAmount = gifts.reduce((amount, gift) => (amount + (+gift[1])), 0);
+      const gifts = statiticsGifts(post['body']);
+      const giftAmount = gifts.reduce((amount, gift) => (amount + (+gift[1])), 0);
 
       return `
 <div class="post-holder" id="pid${post['postid']}">
@@ -781,7 +826,7 @@ const pageTopic = (data) => {
       <div class="t-avatar">
         <img src="/${user['avatar']}" alt="avatar"/>
       </div>
-      <div class="post-time">${post['added'].trim().replace(/\s+/, '<br />')}</div>
+      <div class="post-time">${post['added'].match(/</) ? post['added'] : post['added'].trim().replace(/\s+/, '<br />')}</div>
     </div>
     <div class="space">
       <div class="line user-info">
@@ -798,14 +843,14 @@ const pageTopic = (data) => {
           ${cGifts(gifts)}
         </div>
         <div class="item post-action">
-          <button class="post-action reply" data-floor="${post['floor']}">回复</button>
-          <button class="post-action quote" data-post="${post['postid']}">引用</button>
+          ${info['locked'] === 'yes' ? '' : '<button class="post-action reply" data-floor="' + post['floor'] + '" data-poster="' + user['username'] + '">回复</button>'}
+          ${info['locked'] === 'yes' ? '' : '<button class="post-action quote" data-post="' + post['postid'] + '">引用</button>'}
           ${me['modifier'] === 'yes' ? ('<button class="post-action delete" data-post="' + post['postid'] + '">删除</button>') : ''}
           ${(me['modifier'] === 'yes' || post['posterid'] === me['id']) ? ('<button class="post-action edit" data-post="' + post['postid'] + '">编辑</button>') : ''}
-          <button class="post-action like${post['i_liked'] === 0 ? '' : ' liked'}"><span class="liked">${post['total_like']}<span> 赞</button>
-          <button class="post-action give" data-bonus="100" data-user="${post['posterid']}" data-post="${post['postid']}">100</button>
-          <button class="post-action give" data-bonus="1000" data-user="${post['posterid']}" data-post="${post['postid']}">1000</button>
-          <button class="post-action give" data-bonus="10000" data-user="${post['posterid']}" data-post="${post['postid']}">10000</button>
+          <button class="post-action like${post['i_liked'] === 0 ? '' : ' liked'}" data-post="${post['postid']}"><span class="liked">${post['total_like']}</span> 赞</button>
+          ${post['posterid'] === me['id'] ? '' : '<button class="post-action give" data-bonus="100" data-user="' + post['posterid'] + '" data-post="' + post['postid'] + '">100</button>'}
+          ${post['posterid'] === me['id'] ? '' : '<button class="post-action give" data-bonus="1000" data-user="' + post['posterid'] + '" data-post="' + post['postid'] + '">1000</button>'}
+          ${post['posterid'] === me['id'] ? '' : '<button class="post-action give" data-bonus="10000" data-user="' + post['posterid'] + '" data-post="' + post['postid'] + '">10000</button>'}
         </div>
       </div>
       <div class="content-body">
@@ -821,9 +866,9 @@ const pageTopic = (data) => {
   };
 
   cReplyArea = () => {
-    let container = document.createElement('footer');
+    const container = document.createElement('footer');
     container.className = 'reply-section';
-    container.innerHTML = `
+    container.innerHTML = info['locked'] === 'no' ? `
 <div class="holder line">
   <div class="item">
     <ul class="reply-functions">
@@ -850,7 +895,7 @@ const pageTopic = (data) => {
     </div>
   </div>
 </div>
-    `;
+    ` : '<div class="holder line"><center><i>该主题已被锁定</i></center></div>';
 
     return container;
   };
@@ -864,24 +909,177 @@ const pageTopic = (data) => {
   };
 
   /// Event Listener
-  const handleManage = (ev) => {
-    ev.preventDefault();
+  const path = location.pathname,
+        href = location.href;
+  const handleManage = () => {
     holder.querySelector('.operate-expand').classList.toggle('active');
   };
-  const handleSticky = (ev) => {};
-  const handleLock = (ev) => {};
-  const handleDelete = (ev) => {};
-  const handleMoveto = (ev) => {};
-  const handleHightlight = (ev) => {};
+  const handleSticky = () => fakeFormSubmit(path, {
+    action: 'setsticky',
+    topicid,
+    sticky: (info['sticky'] === 'yes') ? 'no' : 'yes',
+    returnto: href,
+  });
+  const handleLock = () => fakeFormSubmit(path, {
+    action: 'setlocked',
+    topicid,
+    locked: (info['locked'] === 'yes') ? 'no' : 'yes',
+    returnto: href,
+  });
+  const handleDelete = () => {
+    if(parseInt(forumid, 10) !== 35) {
+      fakeFormSubmit(path, {
+        action: 'movetopic',
+        topicid,
+        forumid: 35,
+      });
+    }
+    // fakeFormSubmit(path, {
+    //   action: 'deletetopic',
+    //   topicid,
+    //   forumid,
+    // });
+  }; 
+  
+  const handleMoveto = () => {
+    const sel = holder.querySelector('select[name="moveto"]');
+    if(sel && sel.value) {
+      fakeFormSubmit(path, {
+        action: 'movetopic',
+        topicid,
+        forumid: sel.value,
+      });
+    }
+  };
+  const handleHightlight = () => {
+    const sel = holder.querySelector('select[name="hl"]');
+    if(sel && sel.value) {
+      fakeFormSubmit(path, {
+        action: 'hltopic',
+        topicid,
+        color: sel.value,
+        returnto: href,
+      });
+    }
+  };
 
-  const handleReply = (ev) => {};
-  const handleQuote = (ev) => {};
-  const handleDeletePost = (ev) => {};
-  const handleEdit = (ev) => {};
-  const handleLike = (ev) => {};
-  const handleGive = (ev) => {};
+  const handleReply = (ev) => {
+    const area = document.getElementById('quickreply');
+    const floor = ev.target.dataset.floor;
+    const user = ev.target.dataset.poster;
+    if(area && floor) {
+      // TODO: link to floor
+      area.value = `回复 ${floor} 楼 [@${user}] : ${area.value}`;
+      area.scrollIntoView(false);
+    }
+  };
+  const handleQuote = (ev) => {
+    const postid = ev.target.dataset.post;
+    postid && fakeFormSubmit(path, {
+      action: 'quotepost',
+      postid,
+    }, 'get');
+  };
+  const handleDeletePost = (ev) => {
+    const postid = ev.target.dataset.post;
+    postid && fakeFormSubmit(path, {
+      action: 'deletepost',
+      postid,
+    }, 'get');
+  };
+  const handleEdit = (ev) => {
+    const postid = ev.target.dataset.post;
+    postid && fakeFormSubmit(path, {
+      action: 'editpost',
+      postid,
+    }, 'get');
+  };
+  const handleLike = (ev) => {
+    let el = ev.target;
+    while(el.classList && !el.classList.contains('like')) el = el.parentNode;
+    if(el.classList && el.classList.contains('like')) {
+      const id = el.dataset.post;
+      const cntEl = el.querySelector('.liked');
+      if(id && cntEl) {
+        const cnt = parseInt(cntEl.innerHTML, 10);
+        if(el.classList.contains('i_liked')) {
+          ajaxFormSubmit('/bonus.php', {
+            type: 'like',
+            id,
+            bonus: 100,
+            cancel: 'yes',
+          }, 'POST', () => {
+            cntEl.innerHTML = cnt - 1;
+            el.classList.remove('i_liked');
+          });
+        } else {
+          ajaxFormSubmit('/bonus.php', {
+            type: 'like',
+            id,
+            bonus: 100,
+          }, 'POST', () => {
+            cntEl.innerHTML = cnt + 1;
+            el.classList.add('i_liked');
+          });
+        }
+      }
+    }
+  };
+  const handleGive = (ev) => {
+    const amount = parseInt(me['seedbonus'], 10);
+    const id = ev.target.dataset.post;
+    const bonus = ev.target.dataset.bonus;
+    if(amount > 0 && id && bonus && parseInt(bonus, 10) < amount) {
+      ajaxFormSubmit('/bonus.php', {
+        type: 'post',
+        id,
+        bonus,
+      }, 'POST', () => {
+        const gift = document.getElementById(`gift-pid${id}`);
+        const el = gift.querySelector('.gift-amount > span');
+        const pos = gift.getElementsByTagName('tbody')[0];
+        if(el && pos) {
+           const tr = document.createElement('tr');
+           const tdGiver = document.createElement('td');
+           const tdBonus = document.createElement('td');
+           tdGiver.className = 'giver';
+           tdBonus.className = 'bonus';
+           tdGiver.innerHTML = me['username'];
+           tdBonus.innerHTML = bonus;
+           tr.appendChild(tdGiver);
+           tr.appendChild(tdBonus);
+           pos.appendChild(tr);
 
-  const handleUserPop = (ev) => {};
+           const old = parseInt(el.innerHTML, 10);
+           el.innerHTML = old + parseInt(bonus, 10);
+
+           gift.dispatchEvent(new MouseEvent('mouseenter', {
+             view: window,
+             bubbles: false,
+           }));
+           setTimeout(() => {
+             gift.dispatchEvent(new MouseEvent('mouseleave', {
+              view: window,
+              bubbles: false,
+            }));
+           }, 1500);
+        }
+      });
+    }
+  };
+
+  const handleBonusDedailsShow = (ev) => {
+    let el = ev.target;
+    while(el && el.classList && el.classList.contains('gift-result')) el = el.parentNode;
+    el.querySelector('.gifts-list').classList.add('show');
+  };
+  const handleBonusDedailsHide = (ev) => {
+    let el = ev.target;
+    while(el && el.classList && el.classList.contains('gift-result')) el = el.parentNode;
+    el.querySelector('.gifts-list').classList.remove('show');
+  };
+
+  const handleUserPop = () => {};
 
   const handleQuickReply = () => {};
   const handleQuickReplyEnter = () => {};
@@ -897,15 +1095,15 @@ const pageTopic = (data) => {
   holder.appendChild(cReplyArea());
 
   setTimeout(() => renderLinks([...holder.querySelectorAll('.content-body')]), 0);
-  setTimeout(() => renderPages()); 
+  setTimeout(() => renderPages());
 
   listenerCreator(holder, '.operate-shrink > .op-button', 'click', handleManage);
   listenerCreator(holder, '.op-button.sticky', 'click', handleSticky);
   listenerCreator(holder, '.op-button.lock', 'click', handleLock);
-  listenerCreator(holder, '.op-button.delete', 'click', handleDelete)
+  listenerCreator(holder, '.op-button.delete', 'click', handleDelete);
   listenerCreator(holder, '.op-button.moveto', 'click', handleMoveto);
   listenerCreator(holder, '.op-button.hl', 'click', handleHightlight);
-  
+
   listenerCreator(holder, '.post-action.reply', 'click', handleReply);
   listenerCreator(holder, '.post-action.quote', 'click', handleQuote);
   listenerCreator(holder, '.post-action.delete', 'click', handleDeletePost);
@@ -913,6 +1111,9 @@ const pageTopic = (data) => {
   listenerCreator(holder, '.post-action.like', 'click', handleLike);
   listenerCreator(holder, '.post-action.give', 'click', handleGive);
   
+  listenerCreator(holder, '.gift-result', 'mouseenter', handleBonusDedailsShow);
+  listenerCreator(holder, '.gift-result', 'mouseleave', handleBonusDedailsHide);
+
   listenerCreator(holder, '.t-avatar', 'mouseenter', handleUserPop);
 
 console.log(holder);
@@ -925,14 +1126,14 @@ console.log(holder);
   listenerCreator(holder, '.insert-ico.emotion', 'click', handleInsertEmotion);
 };
 
-let pageForum = (data) => {
+const pageForum = (data) => {
 
 };
 
-let reRenderPage = () => {
+const reRenderPage = () => {
   let urlParams = window.urlParams,
       data = JSON.parse(window.passToClient);
-  console.log(urlParams, data);
+  console.info(urlParams, data);
 
   switch(urlParams['action']){
     case 'viewtopic': pageTopic(data); break;
