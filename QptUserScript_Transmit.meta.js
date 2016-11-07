@@ -20,6 +20,6 @@
 // @include     https://pt.hit.edu.cn/edit.php*
 // @include     https://pt.hit.edu.cn/upload.php
 // @include     https://pt.hit.edu.cn/uploadnew.php
+// @connect     *
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
-

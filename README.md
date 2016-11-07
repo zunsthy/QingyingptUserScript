@@ -16,14 +16,14 @@ Scripts
 1. Ignore Top Banner and nav to the nav bar.
   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_IgnoreBanner.user.js
 
-1. Scale torrents.php Image to 30% width and float up-right corner of your window. 
+1. Scale torrents.php Image to 30% width and float up-right corner of your window.
   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_ScalePreviewImage.user.js
 
 1. Cure the illness called QiangPoZheng, if the odd number and the left alignment are bothering you.
   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/BYRUserScript_realignForumsBadges.user.js
 
 1. Copy specified text from posts (only support email text now).
-  https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Copy.user.js 
+  https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Copy.user.js
 
 Note
 ====
@@ -31,4 +31,4 @@ Nothing useful. So you can code with me/us.
 
 License
 =======
-2333
+MIT Licensed :)

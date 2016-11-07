@@ -20,6 +20,7 @@
 // @include     https://pt.hit.edu.cn/edit.php*
 // @include     https://pt.hit.edu.cn/upload.php
 // @include     https://pt.hit.edu.cn/uploadnew.php
+// @connect     *
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
 
@@ -64,7 +65,7 @@ function eventTrigger(sel, type){
 }
 
 function changeTitle(str){
-	if(/edit\.php/.test(document.location)) 
+	if(/edit\.php/.test(document.location))
 		return;
 	if(str) console.log(str);
 	document.querySelector('input#name').value = str.spaces2space().trim().hsc_decode();
@@ -118,7 +119,7 @@ function requestData(url, successHandle, timeoutHandle, options){
 
 function requestHTML(url, callback, options){
 	requestData(url, function(response){
-// console.log(response.readyState, response.status);      
+// console.log(response.readyState, response.status);
 		if(response.readyState == 4){
 			callback(response.responseText
 				.match(/<body[^>]*?>([\S\s]+)<\/body>/)[1]
@@ -178,10 +179,10 @@ function chooseLink(val){
 		console.log("HDWinG link(HDWinG.ORG)");
   } else if(/https?:\/\/hdchina\.club\/details\.php\?id=\d+/.test(val)){
     console.log("HDChina link(<--old HDWinG <-- old HDChina)");
-    
+
     requestHTML(val, function(doc){
       var sub = newHTMLDom(doc);
-      
+
       Array.prototype.forEach.call(sub.querySelectorAll('img[id^=attach]'), function(el){
         el.removeAttribute('onmouseover');
         el.removeAttribute('onclick');
@@ -198,7 +199,7 @@ function chooseLink(val){
       changeSubtitle(subtitle);
       changeDescr(descr);
       getLink(doc);
-    });    
+    });
 	} else if(/https?:\/\/pt\.hit\.edu\.cn\/details\.php/.test(val)
 			|| /https?:\/\/pt\.hit\.edu\.cn\/details_for_mod\.php/.test(val)){
 		console.log("QingyingPT link");
@@ -223,7 +224,7 @@ function chooseLink(val){
 					descr = sub.querySelector('textarea#descr').innerHTML,
 					url = sub.querySelector('input#url').value,
 					dburl = sub.querySelector('input#dburl').value;
-					
+
 			changeTitle(title);
 			changeSubtitle(subtitle);
 			changeUrl(url);
@@ -252,7 +253,7 @@ function chooseLink(val){
 			changeDescr(descr);
 			getLink(doc);
 
-			Array.prototype.forEach.call(sub.querySelectorAll('dt'), function(el){ 
+			Array.prototype.forEach.call(sub.querySelectorAll('dt'), function(el){
 				if(/副标题/.test(el.innerHTML)){
 					var subtitle = el.nextElementSibling.innerHTML;
 					changeSubtitle(subtitle);
@@ -288,7 +289,7 @@ function chooseLink(val){
 			changeDescr(descr);
 			getLink(doc);
 
-			Array.prototype.forEach.call(sub.querySelectorAll('td.rowhead'), function(el){ 
+			Array.prototype.forEach.call(sub.querySelectorAll('td.rowhead'), function(el){
 				if(/副標題/.test(el.innerHTML)){
 					var subtitle = el.nextElementSibling.innerHTML
 						.replace(/\[([\S\s]+)\]/, "*$1");
@@ -307,7 +308,7 @@ function chooseLink(val){
 			changeTitle(title);
 			changeDescr(descr);
 
-			Array.prototype.forEach.call(sub.querySelectorAll('td.rowhead'), function(el){ 
+			Array.prototype.forEach.call(sub.querySelectorAll('td.rowhead'), function(el){
 				if(/中文名称/.test(el.innerHTML)){
 					var subtitle = el.nextElementSibling.innerHTML;
 					changeSubtitle(subtitle);
@@ -316,7 +317,7 @@ function chooseLink(val){
 		});
   } else if(/https?:\/\/pt\.whu\.edu\.cn\/details\.php\?id=\d+/.test(val)){
     console.log("WHU link");
-    
+
     requestHTML(val, function(doc){
       var sub = newHTMLDom(doc);
       Array.prototype.forEach.call(sub.querySelectorAll('#kdescr > .bbcode img'), function(el){
@@ -332,13 +333,13 @@ function chooseLink(val){
 						.replace(/<a[\S\s]+/, '').trim(),
           subtitle = '',
           descr = sub.querySelector('#kdescr > .bbcode').innerHTML;
-      
-      Array.prototype.forEach.call(sub.querySelectorAll('dt'), function(el){ 
+
+      Array.prototype.forEach.call(sub.querySelectorAll('dt'), function(el){
 				if(/副标题/.test(el.innerHTML)){
 					subtitle = el.nextElementSibling.innerHTML;
 				}
 			});
-      
+
       changeTitle(title);
       changeSubtitle(subtitle);
 			changeDescr(descr);
@@ -346,9 +347,9 @@ function chooseLink(val){
     });
 	} else if(/https?:\/\/www\.hdarea\.co\/details\.php\?id=\d+/.test(val)){
 		console.log('HDArea link');
-		
+
 		requestHTML(val, function(doc){
-			var sub = newHTMLDom(doc);			
+			var sub = newHTMLDom(doc);
 			var hdarealogo = 'http://www.hdarea.co/attachments/201605/20160517115442b44bbbc7dce459dfa136c0f37b9ebce3.png';
 			Array.prototype.forEach.call(sub.querySelectorAll('img[src="' + hdarealogo + '"]'), function(el){
 				el.parentNode.removeChild(el);
@@ -362,8 +363,8 @@ function chooseLink(val){
 			changeTitle(title);
 			changeDescr(descr);
 			getLink(doc);
-			
-			Array.prototype.forEach.call(sub.querySelectorAll('td.rowhead'), function(el){ 
+
+			Array.prototype.forEach.call(sub.querySelectorAll('td.rowhead'), function(el){
 				if(/副标题/.test(el.innerHTML)){
 					var subtitle = el.nextElementSibling.innerHTML;
 					changeSubtitle(subtitle);
@@ -385,7 +386,7 @@ function chooseLink(val){
 			changeDescr(descr);
 			getLink(doc);
 
-			Array.prototype.forEach.call(sub.querySelectorAll('td.rowhead'), function(el){ 
+			Array.prototype.forEach.call(sub.querySelectorAll('td.rowhead'), function(el){
 				if(/副标题/.test(el.innerHTML)){
 					var subtitle = el.nextElementSibling.innerHTML;
 					changeSubtitle(subtitle);
@@ -417,7 +418,7 @@ function chooseLink(val){
 		});
 	} else if(/http:\/\/bbs\.3dmgame\.com\/thread\-\d+\-1\-1\.html/.test(val)){
 		console.log("3DMGame link");
-		
+
 		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc);
 			var el = sub.querySelector('.pcbs td .quote:first-of-type');
@@ -448,7 +449,7 @@ function chooseLink(val){
 
 		requestHTML(val, function(doc){
 			var sub = newHTMLDom(doc),
-					appid = val.match(/\/(\d+)\//)[1], 
+					appid = val.match(/\/(\d+)\//)[1],
 					linkpre = '//cdn.akamai.steamstatic.com/steam/apps/' + appid + '/';
 
 			var imgs = [];
@@ -460,10 +461,10 @@ function chooseLink(val){
 			var requirementarea = "";
 			Array.prototype.forEach.call(sub.querySelectorAll('div[class^=game_area_sys_req]'), function(el){
 				if(el.dataset.os){
-					requirementarea += "[size=2][i][quote=" + el.dataset.os + "]" 
+					requirementarea += "[size=2][i][quote=" + el.dataset.os + "]"
 						+ e(el.innerHTML.replace(/\s+/g, '')).replace(/\[\/?list\]/ig, '')
 						+ "[/quote][/size][/i]";
-				} 
+				}
 			});
 
 			if(old_descr != ''){
@@ -487,7 +488,7 @@ function chooseLink(val){
 			// TODO: alias
 			changeSubtitle(title);
 			document.querySelector("textarea#descr").value = e(descr).replace(/\[(url=[^\]]+|\/url)\]/g, '');
-			
+
 			doc.replace(/www\.imdb\.com\/title\/(tt\d+)/i, function(m, p1){
 				changeUrl(p1);
 			});

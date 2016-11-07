@@ -56,7 +56,7 @@ div.${prefix}-copied-tooltip {
 	padding: 5px;
 	background-color: #777;
 	opacity: .7;
-	
+
 	color: #f0f0f0;
 	font-size: 12.5px;
 
@@ -73,7 +73,7 @@ div.${prefix}-copied-tooltip {
 	} else {
 		style.appendChild(document.createTextNode(css));
 	}
-	
+
 	head.appendChild(style);
 }
 
@@ -99,7 +99,7 @@ function copyText(text){
 	area.value = text;
 
 	body.insertBefore(area, document.body.firstChild);
-	
+
 	// select and copy text
 	area.select();
 	result = document.execCommand('copy');
@@ -117,7 +117,7 @@ function replaceEmail(node){
 		span.innerHTML = node.nodeValue.replace(rEmail, (m) => `<span class="${prefix}-email-text">${m}</span>`);
 		p.insertBefore(span, node);
 		p.removeChild(node);
-		
+
 		// add click listener
 		Array.prototype.forEach.call(span.getElementsByTagName('span'), (ele) => {
 			ele.dataset['copyText'] = ele.innerHTML;
@@ -130,7 +130,7 @@ function clickCopyHandle(e){
 	let text = 'Copied';
 
 	let tooltip = document.createElement('div');
-	tooltip.className = `${prefix}-copied-tooltip`; 
+	tooltip.className = `${prefix}-copied-tooltip`;
 	if(copyText(e.target.dataset['copyText'])){
 		// success
 	} else {
@@ -140,7 +140,7 @@ function clickCopyHandle(e){
 	tooltip.style.left = x + 'px';
 	tooltip.style.top = y + 'px';
 	tooltip.innerHTML = text;
-	
+
 	body.appendChild(tooltip);
 
 	let o = 60;
