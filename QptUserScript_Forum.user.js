@@ -258,12 +258,12 @@ a.forum-link:hover {
 .user-info.donor.active > img{
   width: 11px;
   height: 11px;
-  background: url(icons.png) 0 -57px;
+  background: url("/styles/icons.png") -22px -57px;
 }
 .user-info.warned.active > img{
   width: 11px;
   height: 11px;
-  background: url(icons.png) -33px -57px;
+  background: url("/styles/icons.png") -33px -57px;
 }
 .user-info.title {
   font-weight: lighter;
@@ -387,11 +387,26 @@ ul.reply-functions > li.active {
 }
 .icon-area {
   padding: 5px 0 5px 20px;
-  line-height: 25px;
 }
-.icon-area > img {
-  max-width: 18px;
+.emotion-option {
+  float: left;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 20px;
+  padding: 3px 4px;
+  height: 20px;
+  width: 20px;
+}
+.emotion-option::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+.emotion-option > img {
+  cursor: pointer;
+  max-width: 20px;
   max-height: 20px;
+  vertical-align: middle;
 }
 `;
 
@@ -432,9 +447,44 @@ const calcPageArr = (page, pages) => (pages === 1)
   ? [1]
   : [1, ...(page < 5 ? [] : [0]), ...[page - 2, page - 1, page, page + 1, page + 2].filter(p => p > 1 && p < pages), ...(page > pages - 4 ? [] : [0]), pages];
 
-const listenerCreator = (root, selector, type, handle) => {
-  [...root.querySelectorAll(selector)].forEach((el) => {
-    el.addEventListener(type, handle);
+const emotionTable = [
+  ['i_f', 'face', 2, n => n < 52 ? 'png' : 'gif'],
+  ['bearchildren_', 'bearchildren', 2],
+  ['tiexing_', 'tiexing', 2],
+  ['yxj_', 'yxj', 3],
+  ['ali_', 'ali', 3],
+  ['llb_', 'luoluobu', 3],
+  ['b', 'qpx_n', 2],
+  ['xyj_', 'xyj', 3],
+  ['ltn_', 'lt', 3],
+  ['bfmn_', 'bfmn', 3],
+  ['zxh_', 'pczxh', 3],
+  ['t_', 'tsj', 4],
+  ['wdj_', 'wdj', 2, () => 'png'],
+  ['lxs_', 'lxs', 3],
+  ['b_', 'baodong', 4],
+  ['bd_', 'baodong_d', 4],
+  ['B_', 'bobo', 4],
+  ['yz_', 'shadow', 3],
+];
+
+const decodeEmotion = num => {
+  if(+num < 1000) {
+    return `/pic/smilies/${num}.gif`;
+  }
+  const idx = Math.floor(+num / 100) - 10;
+  const off = +num - 1000 - idx * 100;
+  const k = emotionTable[idx];
+  const ext = k[3] ? k[3].call(null, off) : 'gif';
+  const pad = `0000${off}`.substr(0 - k[2]);
+  return `//tb2.bdstatic.com/tb/editor/images/${k[1]}/${k[0]}${pad}.${ext}`;
+};
+
+const listenerCreator = (root, selector, type, handle, force) => {
+  Array.prototype.forEach.call(root.querySelectorAll(selector), (el) => {
+    if(force || !el.dataset[type]) {
+      el.addEventListener(type, handle);
+    }
   });
 };
 
@@ -491,7 +541,6 @@ const encUriChars = (str) => str.replace(/"/g, '%22').replace(/'/g, '%27').repla
 
 const formatBBcode = (() => {
   const noConflict = `-z-${Date.now()}-`;
-  const emotionUriPrefix = '/pic/smiles/';
 
   const tags = {
     b: (_, content) => `<strong class="bbcode bbcode-b">${content}</strong>`,
@@ -544,7 +593,8 @@ const formatBBcode = (() => {
         src = params;
       } else if(!params) {
         src = content.trim();
-        if(/(\n| )/.test(src) || !src.match(rLinks)) {
+        // if(/(\n| )/.test(src) || !src.match(rLinks)) {
+        if(/(\n| )/.test(src)) {
           valid = false;
         }
       } else {
@@ -589,7 +639,9 @@ const formatBBcode = (() => {
   const singleTags = ['site', 'siteurl', 'siteimg', 'url', 'img', 'video'];
 
   const renderPlain = (str) => str ? str
-    .replace(/\[em(\d+)\]/g, (em, num) => `<img class="bbocde emotion" src="${emotionUriPrefix}${num}.gif">`)
+    .replace(/&#91;/g, '[')
+    .replace(/&#93;/g, ']')
+    .replace(/\[em(\d+)\]/g, (em, num) => `<img class="bbocde emotion" src="${decodeEmotion(num)}" alt="${em}">`)
     .replace(/\n/g, '<br />')
     : '';
 
@@ -655,20 +707,20 @@ const exBBcode = (str) => {
 };
 
 const nativeTreeWalker = (root, walkerFunc) => {
-	let walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false),
-			node,
-			textNodes = [];
+  let walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false),
+      node,
+      textNodes = [];
 
-	while((node = walker.nextNode())) {
-		textNodes.push(node);
-	}
+  while((node = walker.nextNode())) {
+    textNodes.push(node);
+  }
 
-	return textNodes.forEach(walkerFunc);
+  return textNodes.forEach(walkerFunc);
 };
 
 const renderLinks = (nodes) => {
   // TOO SLOW!!!
-  nodes.forEach((node) => nativeTreeWalker(node, (textNode) => {
+  Array.prototype.forEach.call(nodes, (node) => nativeTreeWalker(node, (textNode) => {
     const p = textNode.parentNode;
     if(p.tagName !== 'A') {
       const span = document.createElement('span');
@@ -676,7 +728,7 @@ const renderLinks = (nodes) => {
       // if(text.match(rLinks) || text.match(rEmails)) {
       if(text.match(rLinks)) {
         // span.innerHTML = text.replace(/</g, '&lt;'/* XSS */).replace(rLinks, (l) => `<a class="render-link" target="_blank" href="${l}">${l}</a>`).replace(rEmails, (m) => `<a class="render-mail" target="_top" href="mailto:${m}"><em>${m}</em></a>`);
-        span.innerHTML = text.replace(/</g, '&lt;'/* XSS */).replace(rLinks, (l) => `<a class="render-link" target="_blank" href="${l}">${l}</a>`);
+        span.innerHTML = text.replace(/</g, '&lt;'/* XSS */).replace(rLinks, (l) => `<a class="bbcode render-link" target="_blank" href="${l}">${l}</a>`);
         p.insertBefore(span, textNode);
         p.removeChild(textNode);
       }
@@ -703,7 +755,8 @@ const pageTopic = (data) => {
   const link0 = `/forums.php?action=viewforum&forumid=${info['forumid']}`,
         link = `/forums.php?action=viewtopic&topicid=${topicid}&page=`;
 
-  let cTitleLine, cPagination, cOperateArea, cReplyArea, cContent, cGifts, repeatPage, repeatSection, repeatColor;
+  let cTitleLine, cPagination, cOperateArea, cReplyArea, cContent, cPost, cGifts, cEmotionSelection,
+      repeatPage, repeatSection, repeatColor;
 
   cTitleLine = () => {
     const container = document.createElement('header');
@@ -798,69 +851,105 @@ const pageTopic = (data) => {
 </div>
   `;
 
-  cContent = () => {
-    const container = document.createElement('section');
-    container.className = 'content-section';
-    container.innerHTML = posts.map((post) => {
-      const user = users[post['posterid']] || {
-        id: 0,
-        username: '(该用户不存在)',
-        title: '',
-        level: 0,
-        uploaded: 0,
-        downloaded: 0,
-        ratio: 0,
-        enabled: 'no',
-        modifier: 'no',
-      };
-      const gifts = statiticsGifts(post['body']);
-      const giftAmount = gifts.reduce((amount, gift) => (amount + (+gift[1])), 0);
+  cPost = (post) => {
+    const user = users[post['posterid']] || {
+      id: 0,
+      username: '(该用户不存在)',
+      title: '',
+      level: 0,
+      uploaded: 0,
+      downloaded: 0,
+      ratio: 0,
+      enabled: 'no',
+      modifier: 'no',
+    };
+    const gifts = statiticsGifts(post['body']);
+    const giftAmount = gifts.reduce((amount, gift) => (amount + (+gift[1])), 0);
 
-      return `
-<div class="post-holder" id="pid${post['postid']}">
-  <div class="line">
-    <div class="item post-left">
-      <div class="postid">
-        <a class="t-link" href="#pid${post['postid']}">${post['floor']}楼#${post['postid']}</a>
-      </div>
-      <div class="t-avatar">
-        <img src="/${user['avatar']}" alt="avatar"/>
-      </div>
-      <div class="post-time">${post['added'].match(/</) ? post['added'] : post['added'].trim().replace(/\s+/, '<br />')}</div>
+    const container = document.createElement('div');
+    container.className = 'post-holder';
+    container.id = `pid${post['postid']}`;
+    container.innerHTML = `
+<div class="line">
+  <div class="item post-left">
+    <div class="postid">
+      <a class="t-link" href="#pid${post['postid']}">${post['floor']}楼#${post['postid']}</a>
     </div>
-    <div class="space">
-      <div class="line user-info">
-        <div class="item">
-          <span class="user-info username${user['enabled'] === 'yes' ? '' : ' dead'}" title="${user['username']}"><a target="_blank" class="user_link UC_${user['level']}" href="/userdetails.php?id=${user['id']}">${user['username']}</a></span>
-          <span class="user-info donor${user['donor'] === 'yes' ? ' active' : ''}"><img src="/pic/trans.gif" alt="Donor"></span>
-          <span class="user-info warned${user['warned'] === 'yes' ? ' active' : ''}"><img src="/pic/trans.gif" alt="Warned"></span>
-          <span class="user-info title" title="${user['title']}"><i class="UC_${user['level']}">${user['title']}</i></span>
-          <span class="user-info ratio${(user['leechwarn'] === 'yes' || (user['ratio'] < 1 && +user['ratio'] !== 0)) ? ' warning' : ''}"><span>${+user['ratio'] === 0 ? '+∞' : user['ratio']}</span>=<span>${user['uploaded'].replace(/\s/g, '')}</span>/<span>${user['downloaded'].replace(/\s/g, '')}</span></span>
-          <span class="user-info posts" ${user['title'].length > 15 ? 'style="display: none;"' : ''}>发帖:${user['forumposts']}</span>
-        </div>
-        <div id="gift-pid${post['postid']}" class="space gift-result">
-          <span class="gift-amount">+<span>${giftAmount}</span> 魔力</span>
-          ${cGifts(gifts)}
-        </div>
-        <div class="item post-action">
-          ${info['locked'] === 'yes' ? '' : '<button class="post-action reply" data-floor="' + post['floor'] + '" data-poster="' + user['username'] + '">回复</button>'}
-          ${info['locked'] === 'yes' ? '' : '<button class="post-action quote" data-post="' + post['postid'] + '">引用</button>'}
-          ${me['modifier'] === 'yes' ? ('<button class="post-action delete" data-post="' + post['postid'] + '">删除</button>') : ''}
-          ${(me['modifier'] === 'yes' || post['posterid'] === me['id']) ? ('<button class="post-action edit" data-post="' + post['postid'] + '">编辑</button>') : ''}
-          <button class="post-action like${post['i_liked'] === 0 ? '' : ' liked'}" data-post="${post['postid']}"><span class="liked">${post['total_like']}</span> 赞</button>
-          ${post['posterid'] === me['id'] ? '' : '<button class="post-action give" data-bonus="100" data-user="' + post['posterid'] + '" data-post="' + post['postid'] + '">100</button>'}
-          ${post['posterid'] === me['id'] ? '' : '<button class="post-action give" data-bonus="1000" data-user="' + post['posterid'] + '" data-post="' + post['postid'] + '">1000</button>'}
-          ${post['posterid'] === me['id'] ? '' : '<button class="post-action give" data-bonus="10000" data-user="' + post['posterid'] + '" data-post="' + post['postid'] + '">10000</button>'}
-        </div>
+    <div class="t-avatar">
+      <img src="/${user['avatar']}" alt="avatar"/>
+    </div>
+    <div class="post-time">${post['added'].match(/</) ? post['added'] : post['added'].trim().replace(/\s+/, '<br />')}</div>
+  </div>
+  <div class="space">
+    <div class="line user-info">
+      <div class="item">
+        <span class="user-info username${user['enabled'] === 'yes' ? '' : ' dead'}" title="${user['username']}"><a target="_blank" class="user_link UC_${user['level']}" href="/userdetails.php?id=${user['id']}">${user['username']}</a></span>
+        <span class="user-info donor${user['donor'] === 'yes' ? ' active' : ''}"><img src="/pic/trans.gif" alt="Donor"></span>
+        <span class="user-info warned${user['warned'] === 'yes' ? ' active' : ''}"><img src="/pic/trans.gif" alt="Warned"></span>
+        <span class="user-info title" title="${user['title']}"><i class="UC_${user['level']}">${user['title']}</i></span>
+        <span class="user-info ratio${(user['leechwarn'] === 'yes' || (user['ratio'] < 1 && +user['ratio'] !== 0)) ? ' warning' : ''}"><span>${+user['ratio'] === 0 ? '+∞' : user['ratio']}</span>=<span>${user['uploaded'].replace(/\s/g, '')}</span>/<span>${user['downloaded'].replace(/\s/g, '')}</span></span>
+        <span class="user-info posts" ${user['title'].length > 15 ? 'style="display: none;"' : ''}>发帖:${user['forumposts']}</span>
       </div>
-      <div class="content-body">
-        ${exBBcode(post['body'])}
+      <div id="gift-pid${post['postid']}" class="space gift-result">
+        <span class="gift-amount">+<span>${giftAmount}</span> 魔力</span>
+        ${cGifts(gifts)}
       </div>
+      <div class="item post-action">
+        ${info['locked'] === 'yes' ? '' : '<button class="post-action reply" data-floor="' + post['floor'] + '" data-poster="' + user['username'] + '">回复</button>'}
+        ${info['locked'] === 'yes' ? '' : '<button class="post-action quote" data-post="' + post['postid'] + '">引用</button>'}
+        ${me['modifier'] === 'yes' ? ('<button class="post-action delete" data-post="' + post['postid'] + '">删除</button>') : ''}
+        ${(me['modifier'] === 'yes' || post['posterid'] === me['id']) ? ('<button class="post-action edit" data-post="' + post['postid'] + '">编辑</button>') : ''}
+        <button class="post-action like${post['i_liked'] === 0 ? '' : ' liked'}" data-post="${post['postid']}"><span class="liked">${post['total_like']}</span> 赞</button>
+        ${post['posterid'] === me['id'] ? '' : '<button class="post-action give" data-bonus="100" data-user="' + post['posterid'] + '" data-post="' + post['postid'] + '">100</button>'}
+        ${post['posterid'] === me['id'] ? '' : '<button class="post-action give" data-bonus="1000" data-user="' + post['posterid'] + '" data-post="' + post['postid'] + '">1000</button>'}
+        ${post['posterid'] === me['id'] ? '' : '<button class="post-action give" data-bonus="10000" data-user="' + post['posterid'] + '" data-post="' + post['postid'] + '">10000</button>'}
+      </div>
+    </div>
+    <div class="content-body">
+      ${exBBcode(post['body'])}
     </div>
   </div>
 </div>
-      `;
-    }).join('');
+    `;
+    return container;
+  };
+
+  cContent = () => {
+    const container = document.createElement('section');
+    container.className = 'content-section';
+    posts.map(cPost).forEach(el => container.appendChild(el));
+
+    return container;
+  };
+
+  cEmotionSelection = () => {
+    const emotionList = [
+        1,  8, 28, 29, 30,  7,  9,
+        2,  3,  4,  5,  6, 48, 49,
+       10, 11, 12, 13, 15, 17, 18,
+       19, 21, 22, 25, 26, 62, 63,
+       27, 35, 36, 38, 39, 40, 56,
+       41, 42, 44, 45, 46, 57, 58,
+       50, 51, 52, 53, 55, 59, 60,
+       61, 64, 65, 66, 77,136,183,
+      121,122,125,132,
+    ];
+
+    const container = document.createElement('div');
+    container.className = 'emotion-selection';
+    emotionList.forEach(num => {
+      const el = document.createElement('div');
+      el.className = 'emotion-option';
+
+      const img = document.createElement('img');
+      img.src = decodeEmotion(num);
+      img.className = 'insert-ico emotion';
+      img.title = `[em${num}]`;
+      img.alt = `[em${num}]`;
+
+      el.appendChild(img);
+      container.appendChild(el);
+    });
 
     return container;
   };
@@ -902,7 +991,7 @@ const pageTopic = (data) => {
 
   ///re-render
   const renderPages = () => {
-    [...holder.querySelectorAll('a.f-link[href="#"]')].forEach((el) => {
+    Array.prototype.forEach.call(holder.querySelectorAll('a.f-link[href="#"]'), (el) => {
       el.setAttribute('disabled', 'disabled');
       el.addEventListener('click', (ev) => ev.preventDefault());
     });
@@ -939,8 +1028,8 @@ const pageTopic = (data) => {
     //   topicid,
     //   forumid,
     // });
-  }; 
-  
+  };
+
   const handleMoveto = () => {
     const sel = holder.querySelector('select[name="moveto"]');
     if(sel && sel.value) {
@@ -975,24 +1064,30 @@ const pageTopic = (data) => {
   };
   const handleQuote = (ev) => {
     const postid = ev.target.dataset.post;
-    postid && fakeFormSubmit(path, {
-      action: 'quotepost',
-      postid,
-    }, 'get');
+    if(postid) {
+      fakeFormSubmit(path, {
+        action: 'quotepost',
+        postid,
+      }, 'get');
+    }
   };
   const handleDeletePost = (ev) => {
     const postid = ev.target.dataset.post;
-    postid && fakeFormSubmit(path, {
-      action: 'deletepost',
-      postid,
-    }, 'get');
+    if(postid) {
+      fakeFormSubmit(path, {
+        action: 'deletepost',
+        postid,
+      }, 'get');
+    }
   };
   const handleEdit = (ev) => {
     const postid = ev.target.dataset.post;
-    postid && fakeFormSubmit(path, {
-      action: 'editpost',
-      postid,
-    }, 'get');
+    if(postid) {
+      fakeFormSubmit(path, {
+        action: 'editpost',
+        postid,
+      }, 'get');
+    }
   };
   const handleLike = (ev) => {
     let el = ev.target;
@@ -1081,8 +1176,72 @@ const pageTopic = (data) => {
 
   const handleUserPop = () => {};
 
-  const handleQuickReply = () => {};
-  const handleQuickReplyEnter = () => {};
+  const handleQuickReply = () => {
+    const ta = holder.querySelector('textarea#quickreply');
+    const reply = ta.value.trim();
+    if(reply) {
+      ajaxFormSubmit('/forums_no_fresh.php', {
+        body: reply,
+        topicid,
+        forumid,
+      }, 'POST', (resp) => {
+        let data;
+        try {
+          data = JSON.parse(resp);
+        } catch(e) {
+          alert(e);
+          console.error(e);
+          throw e;
+        }
+        if(data.state === 'success') {
+          const uid = data['id'];
+          if(!users[uid]) {
+            users[uid] = {
+              id: uid,
+              username: data['username'],
+              level: data['level'],
+              donor: data['donor'],
+              enabled: data['enabled'],
+              avatar: data['avatar'],
+              ratio: data['ratio'],
+              uploaded: data['uploaded'],
+              downloaded: data['downloaded'],
+              seedbonus: data['seedbonus'],
+              signature: data['signature'],
+              forumposts: data['forumposts'],
+            };
+          }
+
+          const post = {
+            postid: data['postid'],
+            posterid: uid,
+            body: data['body'],
+            floor: data['counter'],
+            added: data['added'],
+            i_liked: 0,
+            total_like: 0,
+          };
+          posts.push(post);
+
+          const node = cPost(post);
+          holder.querySelector('.content-section').appendChild(node);
+          // bind listener
+          bindPostListener();
+
+          ta.value = '';
+        } else {
+          alert(data.stateMessage);
+        }
+
+      });
+    }
+  };
+  const handleQuickReplyEnter = (ev) => {
+    const code = ev.which || ev.keyCode;
+    if(ev.ctrlKey && code === 13) {
+      handleQuickReply();
+    }
+  };
 
   const handleInsertImage = () => {};
   const handleInsertVideo = () => {};
@@ -1094,36 +1253,49 @@ const pageTopic = (data) => {
   holder.appendChild(cContent());
   holder.appendChild(cReplyArea());
 
-  setTimeout(() => renderLinks([...holder.querySelectorAll('.content-body')]), 0);
+  if(holder.querySelector('.icon-area')) {
+    holder.querySelector('.icon-area').appendChild(cEmotionSelection());
+  }
+
+  setTimeout(() => renderLinks(holder.querySelectorAll('.content-body')), 0);
   setTimeout(() => renderPages());
 
-  listenerCreator(holder, '.operate-shrink > .op-button', 'click', handleManage);
-  listenerCreator(holder, '.op-button.sticky', 'click', handleSticky);
-  listenerCreator(holder, '.op-button.lock', 'click', handleLock);
-  listenerCreator(holder, '.op-button.delete', 'click', handleDelete);
-  listenerCreator(holder, '.op-button.moveto', 'click', handleMoveto);
-  listenerCreator(holder, '.op-button.hl', 'click', handleHightlight);
+  const bindOplistener = () => {
+    listenerCreator(holder, '.operate-shrink > .op-button', 'click', handleManage);
+    listenerCreator(holder, '.op-button.sticky', 'click', handleSticky);
+    listenerCreator(holder, '.op-button.lock', 'click', handleLock);
+    listenerCreator(holder, '.op-button.delete', 'click', handleDelete);
+    listenerCreator(holder, '.op-button.moveto', 'click', handleMoveto);
+    listenerCreator(holder, '.op-button.hl', 'click', handleHightlight);
+  };
 
-  listenerCreator(holder, '.post-action.reply', 'click', handleReply);
-  listenerCreator(holder, '.post-action.quote', 'click', handleQuote);
-  listenerCreator(holder, '.post-action.delete', 'click', handleDeletePost);
-  listenerCreator(holder, '.post-action.edit', 'click', handleEdit);
-  listenerCreator(holder, '.post-action.like', 'click', handleLike);
-  listenerCreator(holder, '.post-action.give', 'click', handleGive);
-  
-  listenerCreator(holder, '.gift-result', 'mouseenter', handleBonusDedailsShow);
-  listenerCreator(holder, '.gift-result', 'mouseleave', handleBonusDedailsHide);
+  const bindPostListener = () => {
+    listenerCreator(holder, '.post-action.reply', 'click', handleReply);
+    listenerCreator(holder, '.post-action.quote', 'click', handleQuote);
+    listenerCreator(holder, '.post-action.delete', 'click', handleDeletePost);
+    listenerCreator(holder, '.post-action.edit', 'click', handleEdit);
+    listenerCreator(holder, '.post-action.like', 'click', handleLike);
+    listenerCreator(holder, '.post-action.give', 'click', handleGive);
 
-  listenerCreator(holder, '.t-avatar', 'mouseenter', handleUserPop);
+    listenerCreator(holder, '.gift-result', 'mouseenter', handleBonusDedailsShow);
+    listenerCreator(holder, '.gift-result', 'mouseleave', handleBonusDedailsHide);
 
-console.log(holder);
-  listenerCreator(holder, '.op-button.reply-button', 'click', handleQuickReply);
-  listenerCreator(holder, '#quickreply', 'keydown', handleQuickReplyEnter);
+    listenerCreator(holder, '.t-avatar', 'mouseenter', handleUserPop);
+  };
 
-  listenerCreator(holder, '.insert-button.image', 'click', handleInsertImage);
-  listenerCreator(holder, '.insert-button.video', 'click', handleInsertVideo);
-  listenerCreator(holder, '.insert-button.music', 'click', handleInsertMusic);
-  listenerCreator(holder, '.insert-ico.emotion', 'click', handleInsertEmotion);
+  const bindReplyListener = () => {
+    listenerCreator(holder, '.op-button.reply-button', 'click', handleQuickReply);
+    listenerCreator(holder, '#quickreply', 'keydown', handleQuickReplyEnter);
+
+    listenerCreator(holder, '.insert-button.image', 'click', handleInsertImage);
+    listenerCreator(holder, '.insert-button.video', 'click', handleInsertVideo);
+    listenerCreator(holder, '.insert-button.music', 'click', handleInsertMusic);
+    listenerCreator(holder, '.insert-ico.emotion', 'click', handleInsertEmotion);
+  };
+
+  bindOplistener();
+  bindPostListener();
+  bindReplyListener();
 };
 
 const pageForum = (data) => {
