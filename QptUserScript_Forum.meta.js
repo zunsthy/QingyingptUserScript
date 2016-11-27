@@ -1,6 +1,6 @@
 ﻿// ==UserScript==
 // @id          Qptuserscript_Forum@ZunSThy
-// @name        Qpt UserScript Forum
+// @name        QptUserScript Forum
 // @author      ZunSThy <zunsthy@gmail.com>
 // @version     0.1.264.1010
 // @namespace   https://github.com/zunsthy/QingyingptUserScript

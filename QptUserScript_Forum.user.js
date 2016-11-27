@@ -1,6 +1,6 @@
 ﻿// ==UserScript==
 // @id          Qptuserscript_Forum@ZunSThy
-// @name        Qpt UserScript Forum
+// @name        QptUserScript Forum
 // @author      ZunSThy <zunsthy@gmail.com>
 // @version     0.1.264.1010
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
@@ -22,16 +22,104 @@ const prefix = 'qpt',
 const head = document.head || document.getElementsByTagName('head')[0],
       body = document.body;
 
-const customCSS = `
+const initCustomCSS = () => {
+  const themeGreen = '#4ca44c';
+  return `
 /* for container */
 #content-holder {
   text-overflow: hidden;
 }
 
+/* cover the global style */
+input, textarea, progress {
+  outline: none;
+  border: 1px solid #d9d9d9;
+  border-top: 1px solid #c0c0c0;
+  border-radius: 1px;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  transition: none;
+  -webkit-transition: none;
+  padding: 5px 8px;
+}
+input[type="text"]:hover, textarea:hover,
+input[type="text"]:focus, textarea:focus {
+  border-color: #b9b9b9;
+  border-top-color: #a0a0a0;
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+}
+input[type="text"]:focus, textarea:focus {
+  border-color: ${themeGreen};
+}
+
+input, progress {
+  box-sizing: border-box;
+}
 
 section,
 footer {
   padding: 10px 20px;
+}
+
+progress {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 100%;
+  padding: 5px 8px;
+  background-color: #fff;
+  /* text-align: left; */
+}
+progress::-webkit-progress-bar {
+  background: transparent;
+}
+progress::-webkit-progress-value {
+  border-radius: 2px;
+  background-image:
+    -webkit-linear-gradient(-45deg,
+      transparent 33%,
+      rgba(0, 0, 0, .1) 33%,
+      rgba(0, 0, 0, .1) 66%,
+      transparent 66%),
+    -webkit-linear-gradient(top,
+      rgba(255, 255, 255, .25),
+      rgba(0, 0, 0, .25)),
+    -webkit-linear-gradient(left, #c4f8c4, #8ef658);
+  background-size: 50px 20px, 100% 100%, 100% 100%;
+
+  -webkit-animation: animate-stripes 5s linear infinite;
+  animation: animate-stripes 5s linear infinite;
+}
+progress::-moz-progress-bar {
+  border-radius: 2px;
+  background-image:
+    -moz-linear-gradient(-45deg,
+      transparent 33%,
+      rgba(0, 0, 0, .1) 33%,
+      rgba(0, 0, 0, .1) 66%,
+      transparent 66%),
+    -moz-linear-gradient(top,
+      rgba(255, 255, 255, .25),
+      rgba(0, 0, 0, .25)),
+    -moz-linear-gradient(left, #c4f8c4, #8ef658);
+  background-size: 50px 20px, 100% 100%, 100% 100%;
+
+  -moz-animation: animate-stripes 5s linear infinite;
+  animation: animate-stripes 5s linear infinite;
+}
+@-webkit-keyframes animate-stripes {
+  0% { background-position: 0px 0px, 0 0, 0 0; }
+  100% { background-position: -100px 0px, 0 0, 0 0; }
+}
+@-moz-keyframes animate-stripes {
+  0% { background-position: 0px 0px; }
+  100% { background-position: -100px 0px; }
+}
+@keyframes animate-stripes {
+  0% { background-position: 0px 0px; }
+  100% { background-position: -100px 0px; }
 }
 
 .op-button, .op-select {
@@ -45,7 +133,7 @@ footer {
   cursor: pointer;
 }
 .op-button:hover {
-  color: #080;
+  color: ${themeGreen};
   background: -webkit-linear-gradient(top, #eaeaea, #dadada);
   background: -moz-linear-gradient(top, #eaeaea, #dadada);
   background: linear-gradient(top, #eaeaea, #dadada);
@@ -76,7 +164,7 @@ footer {
 .f-link:hover,
 .t-link.active,
 .t-link:hover {
-  color: #080;
+  color: ${themeGreen};
   background-color: #f0f0f0;
 }
 
@@ -88,6 +176,7 @@ footer {
   clear: both;
 }
 .line > .item {
+  position: relative;
   flex: 0 1 auto;
   min-height: 1px;
 }
@@ -123,7 +212,7 @@ footer {
 }
 
 a.forum-link {
-  color: #080;
+  color: ${themeGreen};
   text-decoration: none;
 }
 a.forum-link:hover {
@@ -315,7 +404,7 @@ a.forum-link:hover {
 }
 .gifts-list > table > tbody > tr > td:first-child {
   text-align: right;
-  color: #080;
+  color: ${themeGreen};
 }
 .gifts-list > table > tbody > tr > td:last-child {
   text-align: left;
@@ -335,7 +424,7 @@ button.post-action {
   border-radius: 4px;
 }
 button.post-action:hover {
-  color: #080;
+  color: ${themeGreen};
   background-color: #dadada;
 }
 
@@ -359,22 +448,43 @@ footer .holder > .item {
   text-align: left;
 }
 
+.reply-button {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+.reply-button > button {
+  width: 100%;
+  text-align: center;
+  padding: 5px 2px;
+}
+
 ul.reply-functions {
   list-style: none;
   margin: 0;
   padding: 0;
-  margin-bottom: 10px;
 }
 ul.reply-functions > li {
+  display: block;
   margin: 0;
   margin-bottom: 2px;
-  padding: 4px 10px;
+}
+ul.reply-functions > li > label {
+  display: block;
+  text-align: center;
+  padding: 5px 10px;
+  border-radius: 3px;
   cursor: pointer;
 }
-ul.reply-functions > li:hover,
-ul.reply-functions > li.active {
-  cursor: normal;
-  color: #080;
+ul.reply-functions > li > input[type=radio] {
+  clip: rect(0, 0, 0, 0);
+  pointer-events: none;
+  position: absolute;
+}
+ul.reply-functions > li:hover > label ,
+ul.reply-functions > li > input:checked + label {
+  color: ${themeGreen};
   background-color: #f0f0f0;
 }
 .reply-text {
@@ -384,8 +494,15 @@ ul.reply-functions > li.active {
 #quickreply {
   width: 600px;
   height: 146px; /* textarea m1 b1 p5 *2 = 14px */
+  min-height: 146px;
+  resize: vertical;
 }
-.icon-area {
+
+.function-panels > div:not(.active) {
+  display: none;
+}
+
+.icons-area {
   padding: 5px 0 5px 20px;
 }
 .emotion-option {
@@ -408,10 +525,214 @@ ul.reply-functions > li.active {
   max-height: 20px;
   vertical-align: middle;
 }
-`;
 
-(function customStyle(css){
-  let style = document.createElement('style');
+.image-area {
+  padding: 5px 0 5px 20px;
+}
+.image-insertion > .line {
+  margin-top: 14px;
+}
+
+.bbcode {
+}
+.bbcode-b {
+  font-weight: bolder;
+}
+.bbcode-i {
+  font-style: italic;
+}
+.bbcode-u {
+  text-decoration: underline;
+}
+.bbcode-s {
+  text-decoration: line-through;
+}
+.bbcode-q {
+  display: inline;
+}
+.bbcode-q:before {
+  content: open-quote;
+}
+.bbcode-q:after {
+  content: close-quote;
+}
+.bbcode-del {
+  position: relative;
+  text-decoration: none;
+  color: #333;
+  background-color: #333;
+}
+.bbcode-del:hover {
+  color: #fff;
+}
+.bbcode-color {
+  text-shadow: none;
+}
+.bbcode-color[data-bbcode-color="rainbow"],
+.bbcode-color[data-bbcode-color="z"] {
+  background-image: -webkit-gradient(
+    linear,
+    left top,
+    right top,
+    color-stop(0, #f22),
+    color-stop(0.15, #f2f),
+    color-stop(0.3, #22f),
+    color-stop(0.45, #2ff),
+    color-stop(0.6, #2f2),
+    color-stop(0.75, #2f2),
+    color-stop(0.9, #ff2),
+    color-stop(1, #f22));
+  background-image: gradient(
+    linear,
+    left top,
+    right top,
+    color-stop(0, #f22),
+    color-stop(0.15, #f2f),
+    color-stop(0.3, #22f),
+    color-stop(0.45, #2ff),
+    color-stop(0.6, #2f2),
+    color-stop(0.75, #2f2),
+    color-stop(0.9, #ff2),
+    color-stop(1, #f22));
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.bbcode-size {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.bbcode-size[data-bbcode-size="1"] {
+  font-size: 10px;
+  line-height: 1;
+}
+.bbcode-size[data-bbcode-size="2"] {
+  font-size: 14px;
+  line-height: 1.2;
+}
+.bbcode-size[data-bbcode-size="3"] {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.bbcode-size[data-bbcode-size="4"] {
+  font-size: 18px;
+  line-height: 1.5;
+}
+.bbcode-size[data-bbcode-size="5"] {
+  font-size: 24px;
+  line-height: 1.5;
+}
+.bbcode-size[data-bbcode-size="6"] {
+  font-size: 32px;
+}
+.bbcode-size[data-bbcode-size="7"] {
+  font-size: 48px;
+  line-height: 1.2;
+}
+.bbcode-size[data-bbcode-size="z"] {
+  font-size: 16px;
+  line-height: 1;
+}
+.bbcode-font {
+}
+.bbcode-link {
+}
+.bbcode-link > a {
+  color: #3c2;
+}
+a.bbcode.render-link {
+  color: #3c2;
+  text-decoration: underline dashed;
+}
+.bbcode-link > a:active,
+.bbcode-link > a:focus,
+.bbcode-link > a:hover {
+  text-decoration: underline dashed;
+}
+.bbcode-img {
+}
+.bbcode-list {
+  margin: 0;
+  padding-left: 20px;
+}
+.bbcode-list-title {
+  font-weight: bolder;
+}
+.bbcode-list-item {
+  margin: 0;
+  margin-left: 10px;
+}
+fieldset.bbcode-quote {
+  border: 1px solid #ccc;
+  background: #f7f7f7;
+  font-weight: lighter;
+  font-size: 14px;
+  font-family: "微软雅黑", "Microsoft YaHei", arial, helvetica, sans-serif;
+}
+legent.bbcode-quote-title {
+  font-size: 16px;
+  font-style: italic;
+  line-height: 1.2;
+}
+.bbcode-code,
+.bbcode-pre,
+.bbcode-noparse {
+  color: #000;
+  font-family: "Lucida Console", Monaco, "Courier New", Courier, monospace;
+}
+code {
+  font-family: "Courier New", Courier, monospace;
+}
+.bbcode-pre {
+  display: inline-block;
+  border-radius: 4px;
+  margin: 0;
+  margin-left: 2px;
+  margin-right: 2px;
+  padding: 0;
+  padding-left: 2px;
+  padding-right: 2px;
+  background-color: #f8f8f8;
+}
+.bbcode-code {
+  position: relative;
+  border: 1px solid #ccc;
+  border-top: 20px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+}
+.bbcode-code::before,
+.bbcode-code::after {
+  content: "";
+  diplay: block;
+  clear: both;
+}
+.bbcode-code > code {
+  font-weight: lighter;
+  font-size: 14px;
+  line-height: 1.2;
+}
+.bbcode-code > code::before {
+  content: "\\01DD\\0070\\006F\\0254\\0020\\025F\\006F\\0020\\01DD\\0254\\01DD\\0131\\0064\\0020\\0250\\0020\\0073\\0131\\0020\\0073\\0131\\0265\\0287";
+  display: block;
+  position: absolute;
+  top: -18px;
+  right: 10px;
+  color: #fff;
+  font-weight: bolder;
+  font-family: cursive;
+}
+.bbcode-siteurl {
+  font-weight: bolder;
+}
+.bbcode-siteimg {
+  display: inline-block;
+}
+  `;
+};
+
+const customStyle = (css) => {
+  const style = document.createElement('style');
   style.type = 'text/css';
 
   if(style.styleSheet){
@@ -420,28 +741,32 @@ ul.reply-functions > li.active {
     style.appendChild(document.createTextNode(css));
   }
   head.appendChild(style);
-})(customCSS);
+};
+customStyle(initCustomCSS());
 
-(function loadStyle(src){
-  let link  = document.createElement('link');
+const loadStyle = (src) => {
+  const link  = document.createElement('link');
   link.rel = 'stylesheet';
   link.type = 'text/css';
   link.href = src;
   head.appendChild(link);
-})('/css/user.css');
+};
+loadStyle('/css/user.css');
 
-(function getUrlParams(){
-  let match, pl = /\+/g,
-      search = /([^&=]+)=?([^&]*)/g,
-      decode = (str) => decodeURIComponent(str.replace(pl, ' ')),
-      query = window.location.search.substring(1);
-
+const getUrlParams = () => {
+  const pl = /\+/g;
+  const search = /([^&=]+)=?([^&]*)/g;
+  const decode = (str) => decodeURIComponent(str.replace(pl, ' '));
+  const query = window.location.search.substring(1);
   const urlParams = {};
+
+  let match;
   while((match = search.exec(query))){
     urlParams[decode(match[1])] = decode(match[2]);
   }
   window.urlParams = urlParams;
-})();
+};
+getUrlParams();
 
 const calcPageArr = (page, pages) => (pages === 1)
   ? [1]
@@ -514,7 +839,9 @@ const ajaxFormSubmit = (url, options, method, cb) => {
     : `${options}`
     : '';
   const xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = () => (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200 && cb(xhr.responseText, xhr.response));
+  xhr.addEventListener('readystatechange', () =>
+    (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200 && cb(xhr.responseText, xhr.response))
+  );
   if(method === 'POST') {
     xhr.open(method, url);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -524,6 +851,53 @@ const ajaxFormSubmit = (url, options, method, cb) => {
     xhr.send();
   }
 };
+
+const ajaxMultipartSubmit = (url, data, cb, onprogress) => {
+  const fd = new FormData();
+  Object.keys(data).forEach(k => fd.append(k, data[k]));
+
+  const xhr = new XMLHttpRequest();
+  xhr.addEventListener('readystatechange', () =>
+    (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200 && cb(xhr.responseText, xhr.response))
+  );
+  xhr.upload.addEventListener('progress', (ev) => {
+    if(ev.lengthComptable) {
+      onprogress(ev);
+    }
+  });
+  xhr.open('POST', url);
+  // xhr.setRequestHeader('Content-Type', 'multipart/form-data');
+  xhr.send(fd);
+};
+
+const insertText = (selector) =>  (fn, that) => {
+  const ta = document.querySelector(selector);
+
+  if(ta.selectionStart && ta.selectionEnd) {
+    const val = ta.value;
+    const stt = ta.selectionStart;
+    const end = ta.selectionEnd;
+    let insertion = fn;
+    if(fn instanceof Function) {
+      insertion = fn.call(that, val, stt, end, ta);
+    }
+    if(insertion instanceof Function){
+      return insertion.call(that, val, stt, end, ta);
+    }
+
+    ta.value = val.substr(0, stt) + insertion + val.substr(end);
+    ta.selectionStart = stt + insertion.length;
+    ta.selectionEnd = stt + insertion.length;
+    ta.focus();
+    return true;
+  } else {
+    ta.value += fn instanceof Function ? fn.call(that, 0, 0, '', ta) : fn;
+    ta.focus();
+    return true;
+  }
+};
+
+const editorInsert = insertText('#quickreply');
 
 const rGifts = /\[bonus\]([^\[]+)\[b_sp\](\d+)/g;
 const rGift = /\[bonus\]([^\[]+)\[b_sp\](\d+)/;
@@ -548,7 +922,7 @@ const formatBBcode = (() => {
     u: (_, content) => `<u class="bbcode bbcode-u">${content}</u>`,
     s: (_, content) => `<s class="bbcode bbcode-s">${content}</s>`,
     q: (_, content) => `<q class="bbcode bbcode-q">${content}</q>`,
-    del: (_, content) => `<del class="bbcode bbcode-s">${content}</del>`,
+    del: (_, content) => `<del class="bbcode bbcode-del">${content}</del>`,
     color(params, content) {
       let color = '', ms;
       if((ms = params.match(/(#([a-f0-9]{3}){1,2})$/i))) {
@@ -608,7 +982,7 @@ const formatBBcode = (() => {
           src = encUriChars(src);
         }
       }
-      return valid ? `<img class="bbcode bbcode-img" alt="${src}" src="${src}">` : `<span class="bbcode bbcode-nopic">${src}</span>`;
+      return valid ? `<img class="bbcode bbcode-img" alt="${src}" src="${src}" onclick="javascript:window.open(this.src);">` : `<span class="bbcode bbcode-nopic">${src}</span>`;
     },
     list(params, content) {
       let title = params || '';
@@ -620,8 +994,8 @@ const formatBBcode = (() => {
     li: (_, content) => `<li class="bbcode bbcode-list-item">${content}</li>`,
     quote(params, content) {
       let legend = params || '';
-      legend = `<legend> 引用: ${legend} </legend>`;
-      return `<fieldset>${legend}${content}</fieldset>`;
+      legend = `<legend class="bbcode bbcode-quote-title"> 引用: ${legend} </legend>`;
+      return `<fieldset class="bbcode bbcode-quote">${legend}${content}</fieldset>`;
     },
     pre: (_, content) => `<pre class="bbcode bbcode-pre">${content}</pre>`,
     code: (params, content) => `<pre class="bbcode bbcode-code"><code class="${params || ''}">${content.replace(/(^(&#10;)+|(&#10;)+$)/g, '')}</code></pre>`,
@@ -737,14 +1111,22 @@ const renderLinks = (nodes) => {
 };
 
 const pageTopic = (data) => {
+  const fixStyle = `
+.bbcode-img {
+  max-width: 900px;
+  max-height: 600px;
+}
+  `;
+  customStyle(fixStyle);
+
   const posts = data['forumsInfo'],
-      users = data['posters'],
-      me = data['me'],
-      info = data['otherInfo'],
-      sections = data['forumsPlates'],
-      // addons = data['musicaddon'],
-      topicid = info['topicid'] || window.urlParams['topicid'],
-      forumid = info['forumid'] || window.urlParams['forumid'];
+        users = data['posters'],
+        me = data['me'],
+        info = data['otherInfo'],
+        sections = data['forumsPlates'],
+        // addons = data['musicaddon'],
+        topicid = info['topicid'] || window.urlParams['topicid'],
+        forumid = info['forumid'] || window.urlParams['forumid'];
 
   const holder = document.getElementById('outer');
   holder.removeChild(holder.firstChild);
@@ -755,7 +1137,8 @@ const pageTopic = (data) => {
   const link0 = `/forums.php?action=viewforum&forumid=${info['forumid']}`,
         link = `/forums.php?action=viewtopic&topicid=${topicid}&page=`;
 
-  let cTitleLine, cPagination, cOperateArea, cReplyArea, cContent, cPost, cGifts, cEmotionSelection,
+  let cTitleLine, cPagination, cOperateArea, cReplyArea, cContent, cPost, cGifts,
+      cEmotionSelection, cImageInsertion,
       repeatPage, repeatSection, repeatColor;
 
   cTitleLine = () => {
@@ -937,7 +1320,7 @@ const pageTopic = (data) => {
 
     const container = document.createElement('div');
     container.className = 'emotion-selection';
-    emotionList.forEach(num => {
+    emotionList.forEach((num) => {
       const el = document.createElement('div');
       el.className = 'emotion-option';
 
@@ -954,20 +1337,53 @@ const pageTopic = (data) => {
     return container;
   };
 
+  cImageInsertion = () => {
+    const container = document.createElement('div');
+    container.className = 'image-insertion';
+
+    container.innerHTML = `
+<div class="line">
+  <div class="space">
+    <input type="text" class="image-url" name="image-url" style="width: 100%" />
+  </div>
+  <div class="item" style="padding-left: 20px;">
+    <button class="op-button image-insert">插入图片</button>
+  </div>
+</div>
+<div class="line">
+  <div class="space">
+    <progress class="image-upload" max="100" value="0"></progress>
+  </div>
+  <div class="item" style="padding-left: 20px;">
+    <button class="op-button image-upload">上传图片</button>
+  </div>
+</div>
+<div style="display: none;">
+  <input type="file" name="image-file" />
+</div>
+    `;
+
+    return container;
+  };
+
   cReplyArea = () => {
     const container = document.createElement('footer');
     container.className = 'reply-section';
     container.innerHTML = info['locked'] === 'no' ? `
 <div class="holder line">
-  <div class="item">
+  <div class="item" style="width: 71px">
     <ul class="reply-functions">
-      <li class="active">表情</li>
-      <li>图片</li>
-      <li>视频</li>
-      <li>音乐</li>
+      <li>
+        <input type="radio" name="functions" id="functions-icons" value="icons" checked="checked" />
+        <label for="functions-icons">表 情</label>
+      </li>
+      <li>
+        <input type="radio" name="functions" id="functions-image" value="image" />
+        <label for="functions-image">图 片</label>
+      </li>
     </ul>
-    <div class="reply">
-      <button class="op-button reply-button">快速回复</button>
+    <div class="reply-button">
+      <button class="op-button">快速回复</button>
     </div>
   </div>
   <div class="space reply">
@@ -980,7 +1396,9 @@ const pageTopic = (data) => {
         ${cPagination(+info['page'], +info['pages'])}
       </div>
     </div>
-    <div class="icon-area">
+    <div class="function-panels">
+      <div class="icons-area active" data-panel="icons"></div>
+      <div class="image-area" data-panel="image"></div>
     </div>
   </div>
 </div>
@@ -1179,7 +1597,10 @@ const pageTopic = (data) => {
   const handleQuickReply = () => {
     const ta = holder.querySelector('textarea#quickreply');
     const reply = ta.value.trim();
+
     if(reply) {
+      ta.value = '';
+
       ajaxFormSubmit('/forums_no_fresh.php', {
         body: reply,
         topicid,
@@ -1199,15 +1620,17 @@ const pageTopic = (data) => {
             users[uid] = {
               id: uid,
               username: data['username'],
-              level: data['level'],
-              donor: data['donor'],
-              enabled: data['enabled'],
+              level: data['class'],
+              donor: me['donor'],
+              enabled: 'yes',
+              warned: me['warned'],
               avatar: data['avatar'],
               ratio: data['ratio'],
               uploaded: data['uploaded'],
               downloaded: data['downloaded'],
               seedbonus: data['seedbonus'],
               signature: data['signature'],
+              title: me['title'],
               forumposts: data['forumposts'],
             };
           }
@@ -1227,9 +1650,8 @@ const pageTopic = (data) => {
           holder.querySelector('.content-section').appendChild(node);
           // bind listener
           bindPostListener();
-
-          ta.value = '';
         } else {
+          ta.value = reply;
           alert(data.stateMessage);
         }
 
@@ -1244,18 +1666,126 @@ const pageTopic = (data) => {
   };
 
   const handleInsertImage = () => {};
-  const handleInsertVideo = () => {};
-  const handleInsertMusic = () => {};
-  const handleInsertEmotion = () => {};
+  const handleInsertEmotion = (ev) => {
+    editorInsert(` ${ev.target.alt} `);
+  };
+
+  const handleSelectFunctionPanel = (ev) => {
+    const panels = holder.querySelectorAll('.function-panels > div');
+    const val = ev.target.value;
+
+    Array.prototype.forEach.call(panels, (panel) => {
+      if (panel.dataset.panel === val) {
+        panel.classList.add('active');
+      } else {
+        panel.classList.remove('active');
+      }
+    });
+  };
+
+  const handleInsertImageUrl = () => {
+    const input = holder.querySelector('input.image-url');
+    editorInsert(` [img]${input.value.trim()}[/img] `);
+    input.value = '';
+  };
+  const handleInsertImageUrlEnter = (ev) => {
+    const code = ev.which || ev.keyCode;
+    if(ev.ctrlKey && code === 13) {
+      handleInsertImageUrl();
+    }
+  };
+
+  const handleUploadImageFile = () => {
+    const input = holder.querySelector('input[name="image-file"]');
+    if(input.files[0]) {
+      const progressbar = holder.querySelector('progress.image-upload');
+      const data = {
+        file: input.files[0],
+        Token: '67a71cae3f5ebf5de1ae72a26e854ef86d7c85a6:eXVvT3RWM3VuSnNCVlBWQzlpLXAxZkt5T1RvPQ==:eyJkZWFkbGluZSI6MTQ0MjQwOTExMSwiYWN0aW9uIjoiZ2V0IiwidWlkIjoiMTE4MTQiLCJhaWQiOiIyOTU3MCJ9',
+      };
+
+      progressbar.value = 0;
+      const onprogress = (ev) => {
+        progressbar.value = Math.floor(ev.loaded / ev.total * 100);
+      };
+      const fouthUpload = () => {
+        ajaxMultipartSubmit('http://up.imgapi.com/', data, (res) => {
+          let d = {};
+          try {
+            d = JSON.parse(res);
+          } catch(e) {
+            d = { error: 'error' };
+          }
+          progressbar.value = 0;
+          if(!d.error && d.linkurl) {
+            input.value = '';
+            editorInsert(` [img]${d.linkurl}[/img] `);
+          } else {
+            alert('上传失败');
+          }
+        }, onprogress);
+      };
+      const thirdUpload = () => {
+        ajaxMultipartSubmit('http://up.tietuku.cn/', data, (res) => {
+          let d = {};
+          try {
+            d = JSON.parse(res);
+          } catch(e) {
+            d = { error: 'error' };
+          }
+          progressbar.value = 0;
+          if(!d.error && d.linkurl) {
+            input.value = '';
+            editorInsert(` [img]${d.linkurl}[/img] `);
+          } else {
+            fouthUpload();
+          }
+        }, onprogress);
+      };
+      const secondUpload = () => {
+        ajaxMultipartSubmit('/ciar/sendtotietuku.php', data, (res) => {
+          progressbar.value = 0;
+          if(res) {
+            input.value = '';
+            editorInsert(` [img]${res}[/img] `);
+          } else {
+            thirdUpload();
+          }
+        }, onprogress);
+      };
+      const firstUpload = () => {
+        ajaxMultipartSubmit('//hitptimg.online/takefile_v2.php', data, (res) => {
+          let d = {};
+          try {
+            d = JSON.parse(res);
+          } catch(e) {
+            d = { error: 'error' };
+          }
+          progressbar.value = 0;
+          if(!d.error && d.linkurl) {
+            input.value = '';
+            editorInsert(` [img]${d.linkurl}[/img] `);
+          } else {
+            secondUpload();
+          }
+        }, onprogress);
+      };
+
+      firstUpload();
+    }
+  };
+  const handleUploadImageFileTrigger = () => {
+    const input = holder.querySelector('input[name="image-file"]');
+    input.click();
+  };
 
   /// page render
   holder.appendChild(cTitleLine());
   holder.appendChild(cContent());
   holder.appendChild(cReplyArea());
 
-  if(holder.querySelector('.icon-area')) {
-    holder.querySelector('.icon-area').appendChild(cEmotionSelection());
-  }
+  holder.querySelector('.icons-area').appendChild(cEmotionSelection());
+  holder.querySelector('.image-area').appendChild(cImageInsertion());
 
   setTimeout(() => renderLinks(holder.querySelectorAll('.content-body')), 0);
   setTimeout(() => renderPages());
@@ -1284,13 +1814,18 @@ const pageTopic = (data) => {
   };
 
   const bindReplyListener = () => {
-    listenerCreator(holder, '.op-button.reply-button', 'click', handleQuickReply);
+    listenerCreator(holder, '.reply-button', 'click', handleQuickReply);
     listenerCreator(holder, '#quickreply', 'keydown', handleQuickReplyEnter);
 
-    listenerCreator(holder, '.insert-button.image', 'click', handleInsertImage);
-    listenerCreator(holder, '.insert-button.video', 'click', handleInsertVideo);
-    listenerCreator(holder, '.insert-button.music', 'click', handleInsertMusic);
+    listenerCreator(holder, 'input[name="functions"]', 'change', handleSelectFunctionPanel);
     listenerCreator(holder, '.insert-ico.emotion', 'click', handleInsertEmotion);
+    listenerCreator(holder, '.insert-button.image', 'click', handleInsertImage);
+
+    listenerCreator(holder, '.image-insert', 'click', handleInsertImageUrl);
+    listenerCreator(holder, 'input.image-url', 'keydown', handleInsertImageUrlEnter);
+
+    listenerCreator(holder, 'button.image-upload', 'click', handleUploadImageFileTrigger);
+    listenerCreator(holder, 'input[name="image-file"]', 'change', handleUploadImageFile);
   };
 
   bindOplistener();
