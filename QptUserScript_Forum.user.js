@@ -1838,8 +1838,9 @@ const pageForum = (data) => {
 };
 
 const reRenderPage = () => {
-  let urlParams = window.urlParams,
-      data = JSON.parse(window.passToClient);
+  const ori = window.passToClient
+  const urlParams = window.urlParams,
+        data = typeof ori === 'string' ? JSON.parse(ori) : ori;
   console.info(urlParams, data);
 
   switch(urlParams['action']){
