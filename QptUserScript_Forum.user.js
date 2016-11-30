@@ -1235,13 +1235,15 @@ const pageTopic = (data) => {
   `;
 
   cPost = (post) => {
-    const user = users[post['posterid']] || {
+    const user = users[post['posterid']] && users[post['posterid']].username
+     ? users[post['posterid']] : {
+      avatar: 'pic/default_avatar.png',
       id: 0,
       username: '(该用户不存在)',
       title: '',
-      level: 0,
-      uploaded: 0,
-      downloaded: 0,
+      class: 0,
+      uploaded: '0.00KB',
+      downloaded: '0.00KB',
       ratio: 0,
       enabled: 'no',
       modifier: 'no',
@@ -1266,10 +1268,10 @@ const pageTopic = (data) => {
   <div class="space">
     <div class="line user-info">
       <div class="item">
-        <span class="user-info username${user['enabled'] === 'yes' ? '' : ' dead'}" title="${user['username']}"><a target="_blank" class="user_link UC_${user['level']}" href="/userdetails.php?id=${user['id']}">${user['username']}</a></span>
+        <span class="user-info username${user['enabled'] === 'yes' ? '' : ' dead'}" title="${user['username']}"><a target="_blank" class="user_link UC_${user['class']}" href="/userdetails.php?id=${user['id']}">${user['username']}</a></span>
         <span class="user-info donor${user['donor'] === 'yes' ? ' active' : ''}"><img src="/pic/trans.gif" alt="Donor"></span>
         <span class="user-info warned${user['warned'] === 'yes' ? ' active' : ''}"><img src="/pic/trans.gif" alt="Warned"></span>
-        <span class="user-info title" title="${user['title']}"><i class="UC_${user['level']}">${user['title']}</i></span>
+        <span class="user-info title" title="${user['title']}"><i class="UC_${user['class']}">${user['title']}</i></span>
         <span class="user-info ratio${(user['leechwarn'] === 'yes' || (user['ratio'] < 1 && +user['ratio'] !== 0)) ? ' warning' : ''}"><span>${+user['ratio'] === 0 ? '+∞' : user['ratio']}</span>=<span>${user['uploaded'].replace(/\s/g, '')}</span>/<span>${user['downloaded'].replace(/\s/g, '')}</span></span>
         <span class="user-info posts" ${user['title'].length > 15 ? 'style="display: none;"' : ''}>发帖:${user['forumposts']}</span>
       </div>
@@ -1620,7 +1622,7 @@ const pageTopic = (data) => {
             users[uid] = {
               id: uid,
               username: data['username'],
-              level: data['class'],
+              class: data['class'],
               donor: me['donor'],
               enabled: 'yes',
               warned: me['warned'],
