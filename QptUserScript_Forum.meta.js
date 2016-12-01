@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Forum@ZunSThy
 // @name        QptUserScript Forum
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.1.334.2333
+// @version     0.1.337.0100
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Forum.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Forum.user.js

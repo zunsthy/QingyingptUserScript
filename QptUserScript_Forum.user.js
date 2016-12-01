@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Forum@ZunSThy
 // @name        QptUserScript Forum
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.1.335.2333
+// @version     0.1.337.0100
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Forum.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Forum.user.js
@@ -17,7 +17,7 @@
 (function(){
 'use strict';
 const prefix = 'qpt',
-      ver = '0.1.335.2333';
+      ver = '0.1.337.0100';
 
 const head = document.head || document.getElementsByTagName('head')[0],
       body = document.body;
@@ -693,6 +693,7 @@ code {
   padding-left: 2px;
   padding-right: 2px;
   background-color: #f8f8f8;
+  white-space: pre-line;
 }
 .bbcode-code {
   position: relative;
@@ -700,6 +701,7 @@ code {
   border-top: 20px solid #ccc;
   border-radius: 4px;
   padding: 10px;
+  white-space: pre-wrap;
 }
 .bbcode-code::before,
 .bbcode-code::after {
