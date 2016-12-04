@@ -23,11 +23,17 @@ const head = document.head || document.getElementsByTagName('head')[0],
       body = document.body;
 
 const initCustomCSS = () => {
-  const themeGreen = '#4ca44c';
+  const theme = {
+    green: '#4ca44c',
+    black: '#333',
+    gray: '#777',
+    lightGray: '#adadad',
+  };
   return `
 /* for container */
 #content-holder {
   text-overflow: hidden;
+  font-size: 14px;
 }
 
 /* cover the global style */
@@ -50,7 +56,7 @@ input[type="text"]:focus, textarea:focus {
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
 }
 input[type="text"]:focus, textarea:focus {
-  border-color: ${themeGreen};
+  border-color: ${theme.green};
 }
 
 input, progress {
@@ -133,7 +139,7 @@ progress::-moz-progress-bar {
   cursor: pointer;
 }
 .op-button:hover {
-  color: ${themeGreen};
+  color: ${theme.green};
   background: -webkit-linear-gradient(top, #eaeaea, #dadada);
   background: -moz-linear-gradient(top, #eaeaea, #dadada);
   background: linear-gradient(top, #eaeaea, #dadada);
@@ -164,7 +170,7 @@ progress::-moz-progress-bar {
 .f-link:hover,
 .t-link.active,
 .t-link:hover {
-  color: ${themeGreen};
+  color: ${theme.green};
   background-color: #f0f0f0;
 }
 
@@ -172,17 +178,31 @@ progress::-moz-progress-bar {
   display: flex;
   flex-direction: row;
 }
-.line::after {
+.vline {
+  display: flex;
+  flex-direction: column;
+}
+.line::after,
+.vline::after {
   clear: both;
 }
-.line > .item {
+.line > .item,
+.vline > .item {
   position: relative;
   flex: 0 1 auto;
+}
+.line > .space,
+.vline > .space {
+  position: relative;
+  flex: 1 0;
+}
+.line > .item,
+.line > .space {
   min-height: 1px;
 }
-.line > .space {
-  flex: 1 0;
-  min-height: 1px;
+.line > .item,
+.vline > .space {
+  min-width: 1px;
 }
 
 #content-holder {
@@ -190,6 +210,7 @@ progress::-moz-progress-bar {
 }
 
 .topic-title {
+  font-size: 14px;
 }
 .topic-title > .forum,
 .topic-title > .raquo,
@@ -207,12 +228,14 @@ progress::-moz-progress-bar {
   display: none;
 }
 .topic-title > .title > h1 {
-  line-height: 32px;
   margin: 0;
+  font-size: 20px;
+  font-weight: normal;
+  line-height: 32px;
 }
 
 a.forum-link {
-  color: ${themeGreen};
+  color: ${theme.green};
   text-decoration: none;
 }
 a.forum-link:hover {
@@ -289,12 +312,25 @@ a.forum-link:hover {
 .t-avartar {
   text-align: left;
 }
-.postid,
-.post-time {
+.postid {
   text-align: center;
+  padding: 3px 0;
 }
 .postid > a.t-link {
-  color: #777;
+  padding: 3px;
+  color: ${theme.gray};
+}
+.postid > a.t-link > i {
+  color: rgba(0, 0, 0, 0);
+  font-size: 12px;
+}
+.postid > a.t-link:active > i,
+.postid > a.t-link:hover > i,
+.postid > a.t-link:focus > i {
+  color: ${theme.gray};
+}
+.post-time {
+  text-align: center;
 }
 .t-avatar {
   width: 90px;
@@ -314,19 +350,25 @@ a.forum-link:hover {
 }
 
 .line.user-info {
-  border-bottom: 1px solid #eaeaea;
-  margin-bottom: 5px;
-  line-height: 21px;
+  line-height: 22px;
   vertical-align: middle;
+}
+.line.user-info:first-child {
+  margin-bottom: 5px;
+  border-bottom: 1px solid #eaeaea;
+}
+.line.user-info:last-child {
+  margin-top: 14px;
 }
 .line.user-info > .item,
 .line.user-info > .space {
-  line-height: 21px;
+  line-height: 22px;
   vertical-align: middle;
 }
 
 .user-info.username {
   position: relative;
+  font-size: 14px;
 }
 .user-info.username.dead::after {
   content: "";
@@ -355,18 +397,21 @@ a.forum-link:hover {
   background: url("/styles/icons.png") -33px -57px;
 }
 .user-info.title {
-  font-weight: lighter;
   font-size: 12px;
   margin-right: 20px;
 }
 .user-info.ratio,
 .user-info.posts {
+  color: ${theme.lightGray};
   font-size: 12px;
-  font-weight: lighter;
   margin-right: 20px;
 }
 .user-info.ratio.warning {
   color: rgba(255, 0, 0, .7);
+}
+.user-info.ratio:not(.warning):hover,
+.user-info.posts:hover {
+  color: ${theme.black};
 }
 
 .gift-result {
@@ -374,9 +419,6 @@ a.forum-link:hover {
   text-align: right;
 }
 .gift-amount {
-  margin-right: 20px;
-  font-weight: lighter;
-  font-size: 12px;
 }
 .gift-amount > span {
   font-weight: bold;
@@ -384,8 +426,11 @@ a.forum-link:hover {
 .gifts-list {
   display: none;
   position: absolute;
-  top: 21px;
-  right: 10px;
+  right: 0;
+  bottom: 28px;
+  padding: 5px;
+  border-radius: 4px;
+  background-color: #eaeaea;
 }
 .gifts-list.show {
   display: block;
@@ -393,8 +438,6 @@ a.forum-link:hover {
 .gifts-list > table {
   margin: 0;
   padding: 5px 10px;
-  background-color: #eaeaea;
-  border-radius: 5px;
 }
 .gifts-list > table > tbody {
 }
@@ -404,28 +447,32 @@ a.forum-link:hover {
 }
 .gifts-list > table > tbody > tr > td:first-child {
   text-align: right;
-  color: ${themeGreen};
+  color: ${theme.green};
 }
 .gifts-list > table > tbody > tr > td:last-child {
   text-align: left;
-  font-weight: bold;
+  font-weight: bolder;
 }
 
 .item.post-action {
-  white-space: normal;
+  color: ${theme.gray};
 }
 button.post-action {
   border: 0 none;
+  color: ${theme.gray};
   background-color: rgba(255, 255, 255, 0);
   cursor: pointer;
   margin: 0;
-  padding: 0;
+  padding: 2px 3px;
   line-height: 19px;
   border-radius: 4px;
 }
 button.post-action:hover {
-  color: ${themeGreen};
+  color: ${theme.green};
   background-color: #dadada;
+}
+button.post-action.reply {
+  font-size: 16px;
 }
 
 .content-body {
@@ -484,7 +531,7 @@ ul.reply-functions > li > input[type=radio] {
 }
 ul.reply-functions > li:hover > label ,
 ul.reply-functions > li > input:checked + label {
-  color: ${themeGreen};
+  color: ${theme.green};
   background-color: #f0f0f0;
 }
 .reply-text {
@@ -647,6 +694,7 @@ a.bbcode.render-link {
 .bbcode-link > a:active,
 .bbcode-link > a:focus,
 .bbcode-link > a:hover {
+  text-decoration: underline;
   text-decoration: underline dashed;
 }
 .bbcode-img {
@@ -669,7 +717,7 @@ fieldset.bbcode-quote {
   font-size: 14px;
   font-family: "微软雅黑", "Microsoft YaHei", arial, helvetica, sans-serif;
 }
-legent.bbcode-quote-title {
+legend.bbcode-quote-title {
   font-size: 16px;
   font-style: italic;
   line-height: 1.2;
@@ -1136,7 +1184,8 @@ const pageTopic = (data) => {
   holder.id = 'content-holder';
 
   /// Display
-  const link0 = `/forums.php?action=viewforum&forumid=${info['forumid']}`,
+  const linkForums = '/forums.php',
+        linkPlate = `/forums.php?action=viewforum&forumid=${info['forumid']}`,
         link = `/forums.php?action=viewtopic&topicid=${topicid}&page=`;
 
   let cTitleLine, cPagination, cOperateArea, cReplyArea, cContent, cPost, cGifts,
@@ -1149,7 +1198,9 @@ const pageTopic = (data) => {
     container.innerHTML = `
 <section class="line">
   <div class="item topic-title">
-    <span class="forum"><a class="forum-link" href="${link0}">${info['forumname']}</a></span>
+    <span class="forum"><a class="forum-link" href="${linkForums}">清影PT论坛</a></span>
+    <span class="raquo">   &gt;&gt;   </span>
+    <span class="forum"><a class="forum-link" href="${linkPlate}">${info['forumname']}</a></span>
     <span class="raquo">   &gt;&gt;   </span>
     <span class="title"><h1>${info['subject']}</h1></span>
     <span class="${info['locked'] == 'no' ? 'unlock' : 'locked'}">[锁定]</span>
@@ -1259,41 +1310,51 @@ const pageTopic = (data) => {
     container.innerHTML = `
 <div class="line">
   <div class="item post-left">
-    <div class="postid">
-      <a class="t-link" href="#pid${post['postid']}">${post['floor']}楼#${post['postid']}</a>
+    <div class="postid" data-postid="${post['postid']}">
+      <a class="t-link" href="#pid${post['postid']}"><strong>${post['floor']}楼</strong><i>#${post['postid']}</i></a>
     </div>
     <div class="t-avatar">
       <img src="/${user['avatar']}" alt="avatar"/>
     </div>
     <div class="post-time">${post['added'].match(/</) ? post['added'] : post['added'].trim().replace(/\s+/, '<br />')}</div>
   </div>
-  <div class="space">
-    <div class="line user-info">
+  <div class="space vline">
+    <div class="item line user-info">
       <div class="item">
         <span class="user-info username${user['enabled'] === 'yes' ? '' : ' dead'}" title="${user['username']}"><a target="_blank" class="user_link UC_${user['class']}" href="/userdetails.php?id=${user['id']}">${user['username']}</a></span>
         <span class="user-info donor${user['donor'] === 'yes' ? ' active' : ''}"><img src="/pic/trans.gif" alt="Donor"></span>
         <span class="user-info warned${user['warned'] === 'yes' ? ' active' : ''}"><img src="/pic/trans.gif" alt="Warned"></span>
-        <span class="user-info title" title="${user['title']}"><i class="UC_${user['class']}">${user['title']}</i></span>
+        <span class="user-info title" title="${user['title'].replace(/"|\\|:/g, '')}"><a class="UC_${user['class']}" target="_blank" href="/userdetails.php?id=${user['id']}">${user['title']}</a></span>
         <span class="user-info ratio${(user['leechwarn'] === 'yes' || (user['ratio'] < 1 && +user['ratio'] !== 0)) ? ' warning' : ''}"><span>${+user['ratio'] === 0 ? '+∞' : user['ratio']}</span>=<span>${user['uploaded'].replace(/\s/g, '')}</span>/<span>${user['downloaded'].replace(/\s/g, '')}</span></span>
-        <span class="user-info posts" ${user['title'].length > 15 ? 'style="display: none;"' : ''}>发帖:${user['forumposts']}</span>
+        <a class="user-info posts" target="_blank" href="${+user['id'] ? '/userhistory.php?action=viewposts&id=' + user['id'] : ''}">发帖 ${user['forumposts']}</a>
       </div>
-      <div id="gift-pid${post['postid']}" class="space gift-result">
-        <span class="gift-amount">+<span>${giftAmount}</span> 魔力</span>
-        ${cGifts(gifts)}
-      </div>
+    </div>
+
+    <div class="space content-body">
+      ${exBBcode(post['body'])}
+    </div>
+
+    <div class="item line user-info">
+      <div class="space"></div>
       <div class="item post-action">
-        ${info['locked'] === 'yes' ? '' : '<button class="post-action reply" data-floor="' + post['floor'] + '" data-poster="' + user['username'] + '">回复</button>'}
-        ${info['locked'] === 'yes' ? '' : '<button class="post-action quote" data-post="' + post['postid'] + '">引用</button>'}
-        ${me['modifier'] === 'yes' ? ('<button class="post-action delete" data-post="' + post['postid'] + '">删除</button>') : ''}
-        ${(me['modifier'] === 'yes' || post['posterid'] === me['id']) ? ('<button class="post-action edit" data-post="' + post['postid'] + '">编辑</button>') : ''}
-        <button class="post-action like${post['i_liked'] === 0 ? '' : ' liked'}" data-post="${post['postid']}"><span class="liked">${post['total_like']}</span> 赞</button>
         ${post['posterid'] === me['id'] ? '' : '<button class="post-action give" data-bonus="100" data-user="' + post['posterid'] + '" data-post="' + post['postid'] + '">100</button>'}
         ${post['posterid'] === me['id'] ? '' : '<button class="post-action give" data-bonus="1000" data-user="' + post['posterid'] + '" data-post="' + post['postid'] + '">1000</button>'}
         ${post['posterid'] === me['id'] ? '' : '<button class="post-action give" data-bonus="10000" data-user="' + post['posterid'] + '" data-post="' + post['postid'] + '">10000</button>'}
       </div>
-    </div>
-    <div class="content-body">
-      ${exBBcode(post['body'])}
+      <div id="gift-pid${post['postid']}" class="item gift-result">
+        <button class="post-action"><span class="gift-amount">魔力(<span>${giftAmount}</span>)</span></button>
+        ${cGifts(gifts)}
+      </div>
+      <div class="item">
+        <button class="post-action like${post['i_liked'] === 0 ? '' : ' liked'}" data-post="${post['postid']}">赞(<span class="liked">${post['total_like']}</span>)</button>
+      </div>
+      <div class="item post-action">
+        ${(me['modifier'] === 'yes' || post['posterid'] === me['id']) ? ('<button class="post-action edit" data-post="' + post['postid'] + '">编辑</button>') : ''}
+        ${me['modifier'] === 'yes' ? ('<button class="post-action delete" data-post="' + post['postid'] + '">删除</button>') : ''}
+        ${info['locked'] === 'yes' ? '' : '<button class="post-action quote" data-post="' + post['postid'] + '">引用</button>'}
+        ${info['locked'] === 'yes' ? '' : '<button class="post-action reply" data-floor="' + post['floor'] + '" data-poster="' + user['username'] + '">回复</button>'}
+      </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1351,7 +1412,7 @@ const pageTopic = (data) => {
     <input type="text" class="image-url" name="image-url" style="width: 100%" />
   </div>
   <div class="item" style="padding-left: 20px;">
-    <button class="op-button image-insert">插入图片</button>
+    <button class="op-button image-insert">插入链接</button>
   </div>
 </div>
 <div class="line">
@@ -1828,6 +1889,7 @@ const pageTopic = (data) => {
     listenerCreator(holder, '.image-insert', 'click', handleInsertImageUrl);
     listenerCreator(holder, 'input.image-url', 'keydown', handleInsertImageUrlEnter);
 
+    listenerCreator(holder, 'progress.image-upload', 'click', handleUploadImageFileTrigger);
     listenerCreator(holder, 'button.image-upload', 'click', handleUploadImageFileTrigger);
     listenerCreator(holder, 'input[name="image-file"]', 'change', handleUploadImageFile);
   };
