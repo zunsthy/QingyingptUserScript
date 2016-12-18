@@ -14,13 +14,14 @@
 // @grant       none
 // ==/UserScript==
 
-(function(){
+(() => {
 'use strict';
-const prefix = 'qpt',
-      ver = '0.1.338.2222';
 
-const head = document.head || document.getElementsByTagName('head')[0],
-      body = document.body;
+const prefix = 'qpt';
+const ver = '0.1.338.2222';
+
+const head = document.head || document.getElementsByTagName('head');
+const body = document.body;
 
 const initCustomCSS = () => {
   const theme = {
@@ -221,6 +222,9 @@ progress::-moz-progress-bar {
   vertical-align: middle;
   margin-right: 10px;
 }
+.topic-title > .locked {
+  color: #f10;
+}
 .topic-title > .forum {
   font-weight: bold;
 }
@@ -368,7 +372,7 @@ a.forum-link:hover {
 
 .user-info.username {
   position: relative;
-  font-size: 14px;
+  font-size: 16px;
 }
 .user-info.username.dead::after {
   content: "";
@@ -712,6 +716,7 @@ a.bbcode.render-link {
 }
 fieldset.bbcode-quote {
   border: 1px solid #ccc;
+  border-radius: 2px;
   background: #f7f7f7;
   font-weight: lighter;
   font-size: 14px;
@@ -785,7 +790,7 @@ const customStyle = (css) => {
   const style = document.createElement('style');
   style.type = 'text/css';
 
-  if(style.styleSheet){
+  if (style.styleSheet) {
     style.styleSheet.cssText = css;
   } else {
     style.appendChild(document.createTextNode(css));
@@ -795,7 +800,7 @@ const customStyle = (css) => {
 customStyle(initCustomCSS());
 
 const loadStyle = (src) => {
-  const link  = document.createElement('link');
+  const link = document.createElement('link');
   link.rel = 'stylesheet';
   link.type = 'text/css';
   link.href = src;
@@ -806,12 +811,12 @@ loadStyle('/css/user.css');
 const getUrlParams = () => {
   const pl = /\+/g;
   const search = /([^&=]+)=?([^&]*)/g;
-  const decode = (str) => decodeURIComponent(str.replace(pl, ' '));
+  const decode = str => decodeURIComponent(str.replace(pl, ' '));
   const query = window.location.search.substring(1);
   const urlParams = {};
 
   let match;
-  while((match = search.exec(query))){
+  while (match = search.exec(query)) {
     urlParams[decode(match[1])] = decode(match[2]);
   }
   window.urlParams = urlParams;
@@ -843,12 +848,12 @@ const emotionTable = [
   ['yz_', 'shadow', 3],
 ];
 
-const decodeEmotion = num => {
-  if(+num < 1000) {
+const decodeEmotion = (num) => {
+  if (+num < 1000) {
     return `/pic/smilies/${num}.gif`;
   }
   const idx = Math.floor(+num / 100) - 10;
-  const off = +num - 1000 - idx * 100;
+  const off = +num - 1000 - (idx * 100);
   const k = emotionTable[idx];
   const ext = k[3] ? k[3].call(null, off) : 'gif';
   const pad = `0000${off}`.substr(0 - k[2]);
@@ -857,7 +862,7 @@ const decodeEmotion = num => {
 
 const listenerCreator = (root, selector, type, handle, force) => {
   Array.prototype.forEach.call(root.querySelectorAll(selector), (el) => {
-    if(force || !el.dataset[type]) {
+    if (force || !el.dataset[type]) {
       el.addEventListener(type, handle);
     }
   });
@@ -885,14 +890,14 @@ const ajaxFormSubmit = (url, options, method, cb) => {
   method = method.toUpperCase() === 'POST' ? 'POST' : 'GET';
   const data = options
     ? options instanceof Object
-    ? Object.keys(options).map((name) => !name ? '' : (encodeURIComponent(name) + '=' + encodeURIComponent(options[name]))).filter((s) => !!s).join('&')
+    ? Object.keys(options).map(name => !name ? '' : (encodeURIComponent(name) + '=' + encodeURIComponent(options[name]))).filter(Boolean).join('&')
     : `${options}`
     : '';
   const xhr = new XMLHttpRequest();
-  xhr.addEventListener('readystatechange', () =>
-    (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200 && cb(xhr.responseText, xhr.response))
-  );
-  if(method === 'POST') {
+  xhr.addEventListener('readystatechange', () => {
+    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) cb(xhr.responseText, xhr.response);
+  });
+  if (method === 'POST') {
     xhr.open(method, url);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send(data);
@@ -907,11 +912,11 @@ const ajaxMultipartSubmit = (url, data, cb, onprogress) => {
   Object.keys(data).forEach(k => fd.append(k, data[k]));
 
   const xhr = new XMLHttpRequest();
-  xhr.addEventListener('readystatechange', () =>
-    (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200 && cb(xhr.responseText, xhr.response))
-  );
+  xhr.addEventListener('readystatechange', () => {
+    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) cb(xhr.responseText, xhr.response);
+  });
   xhr.upload.addEventListener('progress', (ev) => {
-    if(ev.lengthComptable) {
+    if (ev.lengthComptable) {
       onprogress(ev);
     }
   });
@@ -920,18 +925,18 @@ const ajaxMultipartSubmit = (url, data, cb, onprogress) => {
   xhr.send(fd);
 };
 
-const insertText = (selector) =>  (fn, that) => {
+const insertText = selector => (fn, that) => {
   const ta = document.querySelector(selector);
 
-  if(ta.selectionStart && ta.selectionEnd) {
+  if (ta.selectionStart && ta.selectionEnd) {
     const val = ta.value;
     const stt = ta.selectionStart;
     const end = ta.selectionEnd;
     let insertion = fn;
-    if(fn instanceof Function) {
+    if (fn instanceof Function) {
       insertion = fn.call(that, val, stt, end, ta);
     }
-    if(insertion instanceof Function){
+    if (insertion instanceof Function) {
       return insertion.call(that, val, stt, end, ta);
     }
 
@@ -952,16 +957,16 @@ const editorInsert = insertText('#quickreply');
 const rGifts = /\[bonus\]([^\[]+)\[b_sp\](\d+)/g;
 const rGift = /\[bonus\]([^\[]+)\[b_sp\](\d+)/;
 const statiticsGifts = (str) => {
-  let ms = str.match(rGifts);
+  const ms = str.match(rGifts);
   return ms
-  ? ms.map((m) => m.match(rGift).slice(1))
+  ? ms.map(m => m.match(rGift).slice(1))
   : [];
 };
 
 const rLinks = new RegExp('((?:(?:[a-z][a-z\\d+\\-.]*:\\/{2}(?:(?:[a-z0-9\\-._~\\!$&\'*+,;=:@|]+|%[\\dA-F]{2})+|[0-9.]+|\\[[a-z0-9.]+:[a-z0-9.]+:[a-z0-9.:]+\\])(?::\\d*)?(?:\\/(?:[a-z0-9\\-._~\\!$&\'*+,;=:@|]+|%[\\dA-F]{2})*)*(?:\\?(?:[a-z0-9\\-._~\\!$&\'*+,;=:@\\/?|]+|%[\\dA-F]{2})*)?(?:#(?:[a-z0-9\\-._~\\!$&\'*+,;=:@\\/?|]+|%[\\dA-F]{2})*)?)|(?:www\\.(?:[a-z0-9\\-._~\\!$&\'*+,;=:@|]+|%[\\dA-F]{2})+(?::\\d*)?(?:\\/(?:[a-z0-9\\-._~\\!$&\'*+,;=:@|]+|%[\\dA-F]{2})*)*(?:\\?(?:[a-z0-9\\-._~\\!$&\'*+,;=:@\\/?|]+|%[\\dA-F]{2})*)?(?:#(?:[a-z0-9\\-._~\\!$&\'*+,;=:@\\/?|]+|%[\\dA-F]{2})*)?)))', 'g');
 // const rEmails = new RegExp('((?:[\\w\!\#$\%\&\'\*\+\-\/\=\?\^\`{\|\}\~]+\.)*(?:[\\w\!\#$\%\'\*\+\-\/\=\?\^\`{\|\}\~]|&)+@(?:(?:(?:(?:(?:[a-z0-9]{1}[a-z0-9\-]{0,62}[a-z0-9]{1})|[a-z])\.)+[a-z]{2,6})|(?:\\d{1,3}\.){3}\\d{1,3}(?:\:\\d{1,5})?))', 'g');
 
-const encUriChars = (str) => str.replace(/"/g, '%22').replace(/'/g, '%27').replace(/\(/g, '%28').replace(/\)/g, '%29').replace(/\*/g, '%2A');
+const encUriChars = str => str.replace(/"/g, '%22').replace(/'/g, '%27').replace(/\(/g, '%28').replace(/\)/g, '%29').replace(/\*/g, '%2A');
 
 const formatBBcode = (() => {
   const noConflict = `-z-${Date.now()}-`;
@@ -974,10 +979,11 @@ const formatBBcode = (() => {
     q: (_, content) => `<q class="bbcode bbcode-q">${content}</q>`,
     del: (_, content) => `<del class="bbcode bbcode-del">${content}</del>`,
     color(params, content) {
-      let color = '', ms;
-      if((ms = params.match(/(#([a-f0-9]{3}){1,2})$/i))) {
+      let color = '';
+      let ms;
+      if (ms = params.match(/(#([a-f0-9]{3}){1,2})$/i)) {
         color = ms[1] || '';
-      } else if((ms = params.match(/^(\w+)/))) {
+      } else if (ms = params.match(/^(\w+)/)) {
         color = ms[1] || '';
       }
       return color ? `<span class="bbcode bbcode-color" data-bbcode-color="${color}" style="color: ${color}">${content}</span>` : content;
@@ -993,12 +999,13 @@ const formatBBcode = (() => {
       return ms ? `<span class="bbcode bbcode-font" data-bbcode-font="${font}" style="font-family: '${font}'">${content}</span>` : content;
     },
     url(params, content, single) {
-      let valid = true, url = '';
-      if(single || !content) {
+      let valid = true;
+      let url = '';
+      if (single || !content) {
         url = params;
         content = url;
-      } else if(!params) {
-        if(!/\n/.test(content) && content.match(rLinks)) {
+      } else if (!params) {
+        if (!/\n/.test(content) && content.match(rLinks)) {
           url = content.match(rLinks)[0];
         } else {
           valid = false;
@@ -1006,27 +1013,28 @@ const formatBBcode = (() => {
       } else {
         url = params;
       }
-      if(url) {
+      if (url) {
         url = encUriChars(url);
       }
       return valid ? `<span class="bbcode bbcode-link" data-bbcode-link="${url}"><a href="${url}" target="_blank">${content}</a></span>` : content;
     },
     img(params, content, single) {
-      let valid = true, src = '';
-      if(single || !content) {
+      let valid = true;
+      let src = '';
+      if (single || !content) {
         src = params;
-      } else if(!params) {
+      } else if (!params) {
         src = content.trim();
-        // if(/(\n| )/.test(src) || !src.match(rLinks)) {
-        if(/(\n| )/.test(src)) {
+        // if (/(\n| )/.test(src) || !src.match(rLinks)) {
+        if (/(\n| )/.test(src)) {
           valid = false;
         }
       } else {
         src = params.slice(1);
       }
-      if(valid && src) {
-        let ms = src.match(/^[^\?]+\.(\w+)($|\?)/);
-        if(!ms || !(~['jpg', 'gif', 'svg', 'jpeg', 'tiff', 'png', 'ico', 'bmp', 'webp'].indexOf(ms[1].toLowerCase()))) {
+      if (valid && src) {
+        const ms = src.match(/^[^\?]+\.(\w+)($|\?)/);
+        if (!ms || !(~['jpg', 'gif', 'svg', 'jpeg', 'tiff', 'png', 'ico', 'bmp', 'webp'].indexOf(ms[1].toLowerCase()))) {
           valid = false;
         } else {
           src = encUriChars(src);
@@ -1036,7 +1044,7 @@ const formatBBcode = (() => {
     },
     list(params, content) {
       let title = params || '';
-      if(title){
+      if (title) {
         title = `<span class="bbcode bbcode-list-title">${params.trim()}</span>`;
       }
       return `<ul class="bbocode bbcode-list">${title}${content}</ul>`;
@@ -1062,7 +1070,7 @@ const formatBBcode = (() => {
   const closureTags = ['b', 'i', 'u', 's', 'q', 'del', 'color', 'size', 'font', 'url', 'img', 'list', 'li', 'quote', 'pre', 'code', 'noparse', 'flash', 'flv', 'video'];
   const singleTags = ['site', 'siteurl', 'siteimg', 'url', 'img', 'video'];
 
-  const renderPlain = (str) => str ? str
+  const renderPlain = str => str ? str
     .replace(/&#91;/g, '[')
     .replace(/&#93;/g, ']')
     .replace(/\[em(\d+)\]/g, (em, num) => `<img class="bbocde emotion" src="${decodeEmotion(num)}" alt="${em}">`)
@@ -1081,45 +1089,45 @@ const formatBBcode = (() => {
   const rBBClosure = new RegExp(`<${noConflict}(\\d+) (${closureTags.join('|')})([ ,=][^>]*?)?>([\\S\\s]*?)<${noConflict}\\1 /\\2>`, 'gi');
   const rBBSingle = new RegExp(`\{(${singleTags.join('|')})([ ,=][^\\]]*?)?\}`, 'gi');
 
-  const xLi = (str) => str.replace(/\[\*\]([^\[]*?)(\[\*\]|<\/list])/i, (s, content, endTag) => (endTag === '[*]') ? `>*]${content}>/*][*]` : `>*]${content}>/*]>/list]`);
-  const xList = (str) => str.replace(/<list([ =][^\]]*?)?\]([^<]*?)(<\/list\])/gi, (s) => {
-    while(s !== (s = xLi(s)));
+  const xLi = str => str.replace(/\[\*\]([^\[]*?)(\[\*\]|<\/list])/i, (s, content, endTag) => (endTag === '[*]') ? `>*]${content}>/*][*]` : `>*]${content}>/*]>/list]`);
+  const xList = str => str.replace(/<list([ =][^\]]*?)?\]([^<]*?)(<\/list\])/gi, (s) => {
+    while (s !== (s = xLi(s)));
     return s.replace(/</g, '>');
   });
-  const xClosure = (str) => str.replace(rClosureTags, (s) => s.replace(/\[/g, '<').replace(/\]/g, '>').replace(/<([^>]+?)>/gi, (_s_, tag) => ('<'
+  const xClosure = str => str.replace(rClosureTags, s => s.replace(/\[/g, '<').replace(/\]/g, '>').replace(/<([^>]+?)>/gi, (_s_, tag) => ('<'
     + (tag.match(rDep) ? tag.replace(rDep, (_s__, p1, p2) => `${p1}${1 + parseInt(p2, 10)}`) : `${noConflict}0 ${tag}`)
     + '>')));
 
-  const preprocessNoTag = (str) => str.replace(rNoTag, (_, m1) => `&#91;${m1}&#93;`);
-  const preprocessNoparse = (str) => str.replace(rNoparseTags, (s, tag, params, content) => `[${tag}]${content.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;').replace(/\{/g, '&#123;').replace(/\}/g, '&#125;').replace(/\n/g, '&#10;')}[/${tag}]`);
+  const preprocessNoTag = str => str.replace(rNoTag, (_, m1) => `&#91;${m1}&#93;`);
+  const preprocessNoparse = str => str.replace(rNoparseTags, (s, tag, params, content) => `[${tag}]${content.replace(/\[/g, '&#91;').replace(/\]/g, '&#93;').replace(/\{/g, '&#123;').replace(/\}/g, '&#125;').replace(/\n/g, '&#10;')}[/${tag}]`);
   const preprocessList = (str) => {
     let text = str.replace(rNotListTag, '>').replace(rListTag, '<');
-    while(text !== (text = xList(text)));
+    while (text !== (text = xList(text)));
     return text.replace(/>/g, '[').replace(/\[\*\]/g, '[li]').replace(/\[\/\*\]/g, '[/li]');
   };
-  const preprocessSingleTag = (str) => str.replace(rSingleTags, (s, tag, params) => `{${tag}${params || ''}}`);
+  const preprocessSingleTag = str => str.replace(rSingleTags, (s, tag, params) => `{${tag}${params || ''}}`);
   const preprocessClosureTag = (str) => {
     let text = str;
-    while(text !== (text = xClosure(text)));
+    while (text !== (text = xClosure(text)));
     return text;
   };
 
-  const processClosureTag = (str) => str.replace(rBBClosure, (s, dep, tag, params, content) => {
+  const processClosureTag = str => str.replace(rBBClosure, (s, dep, tag, params, content) => {
     tag = tag.toLowerCase();
     const handle = tags[tag];
     return handle ? handle(params ? params.slice(1).trim() : undefined, processClosureTag(content)) : content;
   });
-  const processSingleTag = (str) => str.replace(rBBSingle, (s, tag, params) => {
+  const processSingleTag = str => str.replace(rBBSingle, (s, tag, params) => {
     tag = tag.toLowerCase();
     const handle = tags[tag];
     return handle ? handle(params ? params.slice(1).trim() : undefined, undefined, true) : '';
   });
 
-  return (str) => renderPlain(processSingleTag(processClosureTag(preprocessSingleTag(preprocessClosureTag(preprocessList(preprocessNoparse(preprocessNoTag(str))))))));
+  return str => renderPlain(processSingleTag(processClosureTag(preprocessSingleTag(preprocessClosureTag(preprocessList(preprocessNoparse(preprocessNoTag(str))))))));
 })();
 
 const exBBcode = (str) => {
-  let res = str.replace(/\[bonus\][\S\s]+/, '')
+  const res = str.replace(/\[bonus\][\S\s]+/, '')
     .replace(/&/g, '&amp;')
     .replace(/\{/g, '&#123;')
     .replace(/\}/g, '&#125;')
@@ -1131,11 +1139,11 @@ const exBBcode = (str) => {
 };
 
 const nativeTreeWalker = (root, walkerFunc) => {
-  let walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false),
-      node,
-      textNodes = [];
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+  const textNodes = [];
+  let node;
 
-  while((node = walker.nextNode())) {
+  while ((node = walker.nextNode())) {
     textNodes.push(node);
   }
 
@@ -1144,15 +1152,15 @@ const nativeTreeWalker = (root, walkerFunc) => {
 
 const renderLinks = (nodes) => {
   // TOO SLOW!!!
-  Array.prototype.forEach.call(nodes, (node) => nativeTreeWalker(node, (textNode) => {
+  Array.prototype.forEach.call(nodes, node => nativeTreeWalker(node, (textNode) => {
     const p = textNode.parentNode;
-    if(p.tagName !== 'A') {
+    if (p.tagName !== 'A') {
       const span = document.createElement('span');
       const text = textNode.nodeValue;
-      // if(text.match(rLinks) || text.match(rEmails)) {
-      if(text.match(rLinks)) {
-        // span.innerHTML = text.replace(/</g, '&lt;'/* XSS */).replace(rLinks, (l) => `<a class="render-link" target="_blank" href="${l}">${l}</a>`).replace(rEmails, (m) => `<a class="render-mail" target="_top" href="mailto:${m}"><em>${m}</em></a>`);
-        span.innerHTML = text.replace(/</g, '&lt;'/* XSS */).replace(rLinks, (l) => `<a class="bbcode render-link" target="_blank" href="${l}">${l}</a>`);
+      // if (text.match(rLinks) || text.match(rEmails)) {
+      if (text.match(rLinks)) {
+        // span.innerHTML = text.replace(/</g, '&lt;'/* XSS */).replace(rLinks, l => `<a class="render-link" target="_blank" href="${l}">${l}</a>`).replace(rEmails, (m) => `<a class="render-mail" target="_top" href="mailto:${m}"><em>${m}</em></a>`);
+        span.innerHTML = text.replace(/</g, '&lt;'/* XSS */).replace(rLinks, l => `<a class="bbcode render-link" target="_blank" href="${l}">${l}</a>`);
         p.insertBefore(span, textNode);
         p.removeChild(textNode);
       }
@@ -1169,28 +1177,40 @@ const pageTopic = (data) => {
   `;
   customStyle(fixStyle);
 
-  const posts = data['forumsInfo'],
-        users = data['posters'],
-        me = data['me'],
-        info = data['otherInfo'],
-        sections = data['forumsPlates'],
-        // addons = data['musicaddon'],
-        topicid = info['topicid'] || window.urlParams['topicid'],
-        forumid = info['forumid'] || window.urlParams['forumid'];
+  const posts = data['forumsInfo'];
+  const users = data['posters'];
+  const me = data['me'];
+  const info = data['otherInfo'];
+  const sections = data['forumsPlates'];
+        // const addons = data['musicaddon'];
+  const topicid = info['topicid'] || window.urlParams['topicid'];
+  const forumid = info['forumid'] || window.urlParams['forumid'];
 
   const holder = document.getElementById('outer');
   holder.removeChild(holder.firstChild);
   // holder.innerHTML = '';
   holder.id = 'content-holder';
 
-  /// Display
-  const linkForums = '/forums.php',
-        linkPlate = `/forums.php?action=viewforum&forumid=${info['forumid']}`,
-        link = `/forums.php?action=viewtopic&topicid=${topicid}&page=`;
+  // Display
+  const linkForums = '/forums.php';
+  const linkPlate = `/forums.php?action=viewforum&forumid=${info['forumid']}`;
+  const link = `/forums.php?action=viewtopic&topicid=${topicid}&page=`;
 
-  let cTitleLine, cPagination, cOperateArea, cReplyArea, cContent, cPost, cGifts,
-      cEmotionSelection, cImageInsertion,
-      repeatPage, repeatSection, repeatColor;
+  const emptyFunction = () => {};
+  let cTitleLine = emptyFunction;
+  let cPagination = emptyFunction;
+  let cOperateArea = emptyFunction;
+  let cReplyArea = emptyFunction;
+  let cContent = emptyFunction;
+  let cPost = emptyFunction;
+  let cGifts = emptyFunction;
+
+  let cEmotionSelection = emptyFunction;
+  let cImageInsertion = emptyFunction;
+
+  let repeatPage = emptyFunction;
+  let repeatSection = emptyFunction;
+  let repeatColor = emptyFunction;
 
   cTitleLine = () => {
     const container = document.createElement('header');
@@ -1203,7 +1223,7 @@ const pageTopic = (data) => {
     <span class="forum"><a class="forum-link" href="${linkPlate}">${info['forumname']}</a></span>
     <span class="raquo">   &gt;&gt;   </span>
     <span class="title"><h1>${info['subject']}</h1></span>
-    <span class="${info['locked'] == 'no' ? 'unlock' : 'locked'}">[锁定]</span>
+    <span class="${info['locked'] === 'no' ? 'unlock' : 'locked'}">[锁定]</span>
   </div>
   <div class="space"></div>
   <div class="item topic-operate">
@@ -1211,7 +1231,7 @@ const pageTopic = (data) => {
       <button class="op-button">&laquo; 管理</button>
     </div>
     <div class="operate-expand">
-      ${me['modifier'] == 'yes' ? cOperateArea() : ''}
+      ${me['modifier'] === 'yes' ? cOperateArea() : ''}
     </div>
   </div>
 </section>
@@ -1249,33 +1269,33 @@ const pageTopic = (data) => {
 <button class="op-button hl">高亮</button>
   `;
 
-  repeatPage = (cur, page) => calcPageArr(cur, page).map((p) => p
+  repeatPage = (cur, page) => calcPageArr(cur, page).map(p => p
     ? (p === cur)
     ? `<li class="item"><a class="f-link current active" href="#">${p}</a>`
     : `<li class="item"><a class="f-link" href="${link + (p - 1)}">${p}</a>`
     : '<li class="item"><span>...</span></li>'
   ).join('');
 
-  repeatSection = () => Object.keys(sections).map((sectionId) => `
+  repeatSection = () => Object.keys(sections).map(sectionId => `
 <option value="${sectionId}">${sections[sectionId]}</option>
   `).join('');
 
   repeatColor = () => '<option value="0">无</option>' + [
-    'Black',  'Sienna',  'Dark Olive Green',  'Dark Green',  'Dark Slate Blue',  'Navy',
-    'Indigo',  'Dark Slate Gray',  'Dark Red',  'Dark Orange',  'Olive',  'Green',  'Teal',
-    'Blue',  'Slate Gray',  'Dim Gray',  'Red',  'Sandy Brown',  'Yellow Green',  'Sea Green',
-    'Medium Turquoise',  'Royal Blue',  'Purple',  'Gray',  'Magenta',  'Orange',  'Yellow',
-    'Lime',  'Cyan',  'Deep Sky Blue',  'Dark Orchid',  'Silver',  'Pink',  'Wheat',
-    'Lemon Chiffon',  'Pale Green',  'Pale Turquoise',  'Light Blue',  'Plum',  'White'
+    'Black', 'Sienna', 'Dark Olive Green', 'Dark Green', 'Dark Slate Blue', 'Navy',
+    'Indigo', 'Dark Slate Gray', 'Dark Red', 'Dark Orange', 'Olive', 'Green', 'Teal',
+    'Blue', 'Slate Gray', 'Dim Gray', 'Red', 'Sandy Brown', 'Yellow Green', 'Sea Green',
+    'Medium Turquoise', 'Royal Blue', 'Purple', 'Gray', 'Magenta', 'Orange', 'Yellow',
+    'Lime', 'Cyan', 'Deep Sky Blue', 'Dark Orchid', 'Silver', 'Pink', 'Wheat',
+    'Lemon Chiffon', 'Pale Green', 'Pale Turquoise', 'Light Blue', 'Plum', 'White',
   ].map((color, i) => `
 <option value="${i + 1}" style="background-color: ${color.replace(/ /g, '').toLowerCase()};">${color}</option>
   `).join('');
 
-  cGifts = (gifts) => `
+  cGifts = gifts => `
 <div class="gifts-list">
   <table>
     <tbody>
-  ` + gifts.map((gift) => `
+  ` + gifts.map(gift => `
 <tr>
   <td class="giver">${gift[0]}</td>
   <td class="bonus">${gift[1]}</td>
@@ -1472,17 +1492,17 @@ const pageTopic = (data) => {
     return container;
   };
 
-  ///re-render
+  // // re-render
   const renderPages = () => {
     Array.prototype.forEach.call(holder.querySelectorAll('a.f-link[href="#"]'), (el) => {
       el.setAttribute('disabled', 'disabled');
-      el.addEventListener('click', (ev) => ev.preventDefault());
+      el.addEventListener('click', ev => ev.preventDefault());
     });
   };
 
-  /// Event Listener
-  const path = location.pathname,
-        href = location.href;
+  // // Event Listener
+  const path = location.pathname;
+  const href = location.href;
   const handleManage = () => {
     holder.querySelector('.operate-expand').classList.toggle('active');
   };
@@ -1499,7 +1519,7 @@ const pageTopic = (data) => {
     returnto: href,
   });
   const handleDelete = () => {
-    if(parseInt(forumid, 10) !== 35) {
+    if (parseInt(forumid, 10) !== 35) {
       fakeFormSubmit(path, {
         action: 'movetopic',
         topicid,
@@ -1515,7 +1535,7 @@ const pageTopic = (data) => {
 
   const handleMoveto = () => {
     const sel = holder.querySelector('select[name="moveto"]');
-    if(sel && sel.value) {
+    if (sel && sel.value) {
       fakeFormSubmit(path, {
         action: 'movetopic',
         topicid,
@@ -1525,7 +1545,7 @@ const pageTopic = (data) => {
   };
   const handleHightlight = () => {
     const sel = holder.querySelector('select[name="hl"]');
-    if(sel && sel.value) {
+    if (sel && sel.value) {
       fakeFormSubmit(path, {
         action: 'hltopic',
         topicid,
@@ -1539,15 +1559,17 @@ const pageTopic = (data) => {
     const area = document.getElementById('quickreply');
     const floor = ev.target.dataset.floor;
     const user = ev.target.dataset.poster;
-    if(area && floor) {
+    if (area && floor) {
       // TODO: link to floor
       area.value = `回复 ${floor} 楼 [@${user}] : ${area.value}`;
       area.scrollIntoView(false);
+      area.focus();
+      insertText('');
     }
   };
   const handleQuote = (ev) => {
     const postid = ev.target.dataset.post;
-    if(postid) {
+    if (postid) {
       fakeFormSubmit(path, {
         action: 'quotepost',
         postid,
@@ -1556,7 +1578,7 @@ const pageTopic = (data) => {
   };
   const handleDeletePost = (ev) => {
     const postid = ev.target.dataset.post;
-    if(postid) {
+    if (postid) {
       fakeFormSubmit(path, {
         action: 'deletepost',
         postid,
@@ -1565,7 +1587,7 @@ const pageTopic = (data) => {
   };
   const handleEdit = (ev) => {
     const postid = ev.target.dataset.post;
-    if(postid) {
+    if (postid) {
       fakeFormSubmit(path, {
         action: 'editpost',
         postid,
@@ -1574,13 +1596,13 @@ const pageTopic = (data) => {
   };
   const handleLike = (ev) => {
     let el = ev.target;
-    while(el.classList && !el.classList.contains('like')) el = el.parentNode;
-    if(el.classList && el.classList.contains('like')) {
+    while (el.classList && !el.classList.contains('like')) el = el.parentNode;
+    if (el.classList && el.classList.contains('like')) {
       const id = el.dataset.post;
       const cntEl = el.querySelector('.liked');
-      if(id && cntEl) {
+      if (id && cntEl) {
         const cnt = parseInt(cntEl.innerHTML, 10);
-        if(el.classList.contains('i_liked')) {
+        if (el.classList.contains('i_liked')) {
           ajaxFormSubmit('/bonus.php', {
             type: 'like',
             id,
@@ -1607,7 +1629,7 @@ const pageTopic = (data) => {
     const amount = parseInt(me['seedbonus'], 10);
     const id = ev.target.dataset.post;
     const bonus = ev.target.dataset.bonus;
-    if(amount > 0 && id && bonus && parseInt(bonus, 10) < amount) {
+    if (amount > 0 && id && bonus && parseInt(bonus, 10) < amount) {
       ajaxFormSubmit('/bonus.php', {
         type: 'post',
         id,
@@ -1616,7 +1638,7 @@ const pageTopic = (data) => {
         const gift = document.getElementById(`gift-pid${id}`);
         const el = gift.querySelector('.gift-amount > span');
         const pos = gift.getElementsByTagName('tbody')[0];
-        if(el && pos) {
+        if (el && pos) {
            const tr = document.createElement('tr');
            const tdGiver = document.createElement('td');
            const tdBonus = document.createElement('td');
@@ -1648,12 +1670,12 @@ const pageTopic = (data) => {
 
   const handleBonusDedailsShow = (ev) => {
     let el = ev.target;
-    while(el && el.classList && el.classList.contains('gift-result')) el = el.parentNode;
+    while (el && el.classList && el.classList.contains('gift-result')) el = el.parentNode;
     el.querySelector('.gifts-list').classList.add('show');
   };
   const handleBonusDedailsHide = (ev) => {
     let el = ev.target;
-    while(el && el.classList && el.classList.contains('gift-result')) el = el.parentNode;
+    while (el && el.classList && el.classList.contains('gift-result')) el = el.parentNode;
     el.querySelector('.gifts-list').classList.remove('show');
   };
 
@@ -1663,7 +1685,7 @@ const pageTopic = (data) => {
     const ta = holder.querySelector('textarea#quickreply');
     const reply = ta.value.trim();
 
-    if(reply) {
+    if (reply) {
       ta.value = '';
 
       ajaxFormSubmit('/forums_no_fresh.php', {
@@ -1674,14 +1696,14 @@ const pageTopic = (data) => {
         let data;
         try {
           data = JSON.parse(resp);
-        } catch(e) {
-          alert(e);
+        } catch (e) {
+          window.alert(e);
           console.error(e);
           throw e;
         }
-        if(data.state === 'success') {
+        if (data.state === 'success') {
           const uid = data['id'];
-          if(!users[uid]) {
+          if (!users[uid]) {
             users[uid] = {
               id: uid,
               username: data['username'],
@@ -1717,15 +1739,15 @@ const pageTopic = (data) => {
           bindPostListener();
         } else {
           ta.value = reply;
-          alert(data.stateMessage);
+          window.alert(data.stateMessage);
+          console.error(data.stateMessage);
         }
-
       });
     }
   };
   const handleQuickReplyEnter = (ev) => {
     const code = ev.which || ev.keyCode;
-    if(ev.ctrlKey && code === 13) {
+    if (ev.ctrlKey && code === 13) {
       handleQuickReply();
     }
   };
@@ -1755,14 +1777,14 @@ const pageTopic = (data) => {
   };
   const handleInsertImageUrlEnter = (ev) => {
     const code = ev.which || ev.keyCode;
-    if(ev.ctrlKey && code === 13) {
+    if (ev.ctrlKey && code === 13) {
       handleInsertImageUrl();
     }
   };
 
   const handleUploadImageFile = () => {
     const input = holder.querySelector('input[name="image-file"]');
-    if(input.files[0]) {
+    if (input.files[0]) {
       const progressbar = holder.querySelector('progress.image-upload');
       const data = {
         file: input.files[0],
@@ -1771,22 +1793,22 @@ const pageTopic = (data) => {
 
       progressbar.value = 0;
       const onprogress = (ev) => {
-        progressbar.value = Math.floor(ev.loaded / ev.total * 100);
+        progressbar.value = Math.floor((ev.loaded / ev.total) * 100);
       };
       const fouthUpload = () => {
         ajaxMultipartSubmit('http://up.imgapi.com/', data, (res) => {
           let d = {};
           try {
             d = JSON.parse(res);
-          } catch(e) {
+          } catch (e) {
             d = { error: 'error' };
           }
           progressbar.value = 0;
-          if(!d.error && d.linkurl) {
+          if (!d.error && d.linkurl) {
             input.value = '';
             editorInsert(` [img]${d.linkurl}[/img] `);
           } else {
-            alert('上传失败');
+            window.alert('上传失败');
           }
         }, onprogress);
       };
@@ -1795,11 +1817,11 @@ const pageTopic = (data) => {
           let d = {};
           try {
             d = JSON.parse(res);
-          } catch(e) {
+          } catch (e) {
             d = { error: 'error' };
           }
           progressbar.value = 0;
-          if(!d.error && d.linkurl) {
+          if (!d.error && d.linkurl) {
             input.value = '';
             editorInsert(` [img]${d.linkurl}[/img] `);
           } else {
@@ -1810,7 +1832,7 @@ const pageTopic = (data) => {
       const secondUpload = () => {
         ajaxMultipartSubmit('/ciar/sendtotietuku.php', data, (res) => {
           progressbar.value = 0;
-          if(res) {
+          if (res) {
             input.value = '';
             editorInsert(` [img]${res}[/img] `);
           } else {
@@ -1823,11 +1845,11 @@ const pageTopic = (data) => {
           let d = {};
           try {
             d = JSON.parse(res);
-          } catch(e) {
+          } catch (e) {
             d = { error: 'error' };
           }
           progressbar.value = 0;
-          if(!d.error && d.linkurl) {
+          if (!d.error && d.linkurl) {
             input.value = '';
             editorInsert(` [img]${d.linkurl}[/img] `);
           } else {
@@ -1844,13 +1866,13 @@ const pageTopic = (data) => {
     input.click();
   };
 
-  /// page render
+  // // page render
   holder.appendChild(cTitleLine());
   holder.appendChild(cContent());
   holder.appendChild(cReplyArea());
 
-  holder.querySelector('.icons-area').appendChild(cEmotionSelection());
-  holder.querySelector('.image-area').appendChild(cImageInsertion());
+  if (holder.querySelector('.icons-area')) holder.querySelector('.icons-area').appendChild(cEmotionSelection());
+  if (holder.querySelector('.image-area')) holder.querySelector('.image-area').appendChild(cImageInsertion());
 
   setTimeout(() => renderLinks(holder.querySelectorAll('.content-body')), 0);
   setTimeout(() => renderPages());
@@ -1904,17 +1926,17 @@ const pageForum = (data) => {
 };
 
 const reRenderPage = () => {
-  const ori = window.passToClient
-  const urlParams = window.urlParams,
-        data = typeof ori === 'string' ? JSON.parse(ori) : ori;
+  const ori = window.passToClient;
+  const urlParams = window.urlParams;
+  const data = typeof ori === 'string' ? JSON.parse(ori) : ori;
   console.info(urlParams, data);
 
-  switch(urlParams['action']){
+  switch (urlParams['action']) {
     case 'viewtopic': pageTopic(data); break;
     case 'viewforum': pageForum(data); break;
+    default: break;
   }
 };
 
 reRenderPage();
-
 })();
