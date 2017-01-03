@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Transmit
 // @name        QptUserScript Transmit
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.5.8.310.2323
+// @version     0.7.2
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Transmit.user.js
@@ -24,7 +24,7 @@
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
 
-var ver = "0.5.7.310.2323";
+var ver = "0.7.2";
 
 // Powered by Mort(5787) & ZunSThy(1788)
 // Thanks for Mort2000@FDUPT
@@ -519,6 +519,6 @@ document.querySelector('input#reflink').addEventListener('change', function(){
 // insert ori script
 var script = document.createElement('script');
 script.type = 'text/javascript';
-script.src = '/pageext/' + (/edit\.php/.test(location.pathname) ? 'edit_plugin' : 'upload_plugin') + '.js';
+script.src = '/js/plugin/' + (/edit\.php/.test(location.pathname) ? 'edit' : 'upload') + '.js';
 console.log(script);
 document.body.appendChild(script);
