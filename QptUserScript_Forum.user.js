@@ -64,9 +64,16 @@ input, progress {
   box-sizing: border-box;
 }
 
-section,
-footer {
+header,
+main,
+footer,
+section {
   padding: 10px 20px;
+}
+header.nopadding,
+section.nopadding,
+footer.nopadding {
+  padding: 0;
 }
 
 progress {
@@ -127,6 +134,16 @@ progress::-moz-progress-bar {
 @keyframes animate-stripes {
   0% { background-position: 0px 0px; }
   100% { background-position: -100px 0px; }
+}
+
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
 }
 
 .op-button, .op-select {
@@ -287,6 +304,27 @@ a.forum-link:hover {
 
 .topic-info {
   color: #808080;
+}
+
+ul.topic-list {
+  margin: 0;
+  padding: 0;
+}
+ul.topic-list > li {
+  list-style: none;
+}
+.topic-row {
+  margin: 0;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.topic-page-area {
+  
+  text-align: left;
+}
+.topic-page-link {
+  font-size: 12px;
 }
 
 .page-container {
@@ -584,6 +622,19 @@ ul.reply-functions > li > input:checked + label {
   margin-top: 14px;
 }
 
+.music-addons {
+  display: none;
+}
+
+.forum-moderator-label {
+  color: ${theme.lightGray};
+}
+
+.forum-search {
+  margin: 0 10px;
+  height: 33px;
+}
+
 .bbcode {
 }
 .bbcode-b {
@@ -827,6 +878,15 @@ const calcPageArr = (page, pages) => (pages === 1)
   ? [1]
   : [1, ...(page < 5 ? [] : [0]), ...[page - 2, page - 1, page, page + 1, page + 2].filter(p => p > 1 && p < pages), ...(page > pages - 4 ? [] : [0]), pages];
 
+const paletteTable = [
+  'Black', 'Sienna', 'Dark Olive Green', 'Dark Green', 'Dark Slate Blue', 'Navy',
+  'Indigo', 'Dark Slate Gray', 'Dark Red', 'Dark Orange', 'Olive', 'Green', 'Teal',
+  'Blue', 'Slate Gray', 'Dim Gray', 'Red', 'Sandy Brown', 'Yellow Green', 'Sea Green',
+  'Medium Turquoise', 'Royal Blue', 'Purple', 'Gray', 'Magenta', 'Orange', 'Yellow',
+  'Lime', 'Cyan', 'Deep Sky Blue', 'Dark Orchid', 'Silver', 'Pink', 'Wheat',
+  'Lemon Chiffon', 'Pale Green', 'Pale Turquoise', 'Light Blue', 'Plum', 'White',
+];
+
 const emotionTable = [
   ['i_f', 'face', 2, n => n < 52 ? 'png' : 'gif'],
   ['bearchildren_', 'bearchildren', 2],
@@ -886,6 +946,8 @@ const fakeFormSubmit = (url, options, method) => {
   form.submit();
 };
 
+const requests = [];
+
 const ajaxFormSubmit = (url, options, method, cb) => {
   method = method.toUpperCase() === 'POST' ? 'POST' : 'GET';
   const data = options
@@ -894,8 +956,19 @@ const ajaxFormSubmit = (url, options, method, cb) => {
     : `${options}`
     : '';
   const xhr = new XMLHttpRequest();
+  requests.push(xhr);
+
   xhr.addEventListener('readystatechange', () => {
-    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) cb(xhr.responseText, xhr.response);
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      const i = requests.findIndex(v => v === xhr);
+      if (i !== -1) {
+        requests.splice(i, 1);
+      }
+
+      if (xhr.status === 200) {
+        cb(xhr.responseText, xhr.response);
+      }
+    }
   });
   if (method === 'POST') {
     xhr.open(method, url);
@@ -912,8 +985,19 @@ const ajaxMultipartSubmit = (url, data, cb, onprogress) => {
   Object.keys(data).forEach(k => fd.append(k, data[k]));
 
   const xhr = new XMLHttpRequest();
+  requests.push(xhr);
+
   xhr.addEventListener('readystatechange', () => {
-    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) cb(xhr.responseText, xhr.response);
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      const i = requests.findIndex(v => v === xhr);
+      if (i !== -1) {
+        requests.splice(i, 1);
+      }
+
+      if (xhr.status === 200) {
+        cb(xhr.responseText, xhr.response);
+      }
+    }
   });
   xhr.upload.addEventListener('progress', (ev) => {
     if (ev.lengthComptable) {
@@ -1168,7 +1252,7 @@ const renderLinks = (nodes) => {
   }));
 };
 
-const pageTopic = (data) => {
+const pageTopic = (data, params) => {
   const fixStyle = `
 .bbcode-img {
   max-width: 900px;
@@ -1182,9 +1266,9 @@ const pageTopic = (data) => {
   const me = data['me'];
   const info = data['otherInfo'];
   const sections = data['forumsPlates'];
-        // const addons = data['musicaddon'];
-  const topicid = info['topicid'] || window.urlParams['topicid'];
-  const forumid = info['forumid'] || window.urlParams['forumid'];
+  // const addons = data['musicaddon'];
+  const topicid = info['topicid'] || params['topicid'];
+  const forumid = info['forumid'] || params['forumid'];
 
   const holder = document.getElementById('outer');
   holder.removeChild(holder.firstChild);
@@ -1193,7 +1277,7 @@ const pageTopic = (data) => {
 
   // Display
   const linkForums = '/forums.php';
-  const linkPlate = `/forums.php?action=viewforum&forumid=${info['forumid']}`;
+  const linkPlate = `/forums.php?action=viewforum&forumid=${forumid}`;
   const link = `/forums.php?action=viewtopic&topicid=${topicid}&page=`;
 
   const emptyFunction = () => {};
@@ -1214,7 +1298,7 @@ const pageTopic = (data) => {
 
   cTitleLine = () => {
     const container = document.createElement('header');
-    container.className = 'header-section';
+    container.className = 'header-section nopadding';
     container.innerHTML = `
 <section class="line">
   <div class="item topic-title">
@@ -1280,14 +1364,7 @@ const pageTopic = (data) => {
 <option value="${sectionId}">${sections[sectionId]}</option>
   `).join('');
 
-  repeatColor = () => '<option value="0">无</option>' + [
-    'Black', 'Sienna', 'Dark Olive Green', 'Dark Green', 'Dark Slate Blue', 'Navy',
-    'Indigo', 'Dark Slate Gray', 'Dark Red', 'Dark Orange', 'Olive', 'Green', 'Teal',
-    'Blue', 'Slate Gray', 'Dim Gray', 'Red', 'Sandy Brown', 'Yellow Green', 'Sea Green',
-    'Medium Turquoise', 'Royal Blue', 'Purple', 'Gray', 'Magenta', 'Orange', 'Yellow',
-    'Lime', 'Cyan', 'Deep Sky Blue', 'Dark Orchid', 'Silver', 'Pink', 'Wheat',
-    'Lemon Chiffon', 'Pale Green', 'Pale Turquoise', 'Light Blue', 'Plum', 'White',
-  ].map((color, i) => `
+  repeatColor = () => '<option value="0">无</option>' + paletteTable.map((color, i) => `
 <option value="${i + 1}" style="background-color: ${color.replace(/ /g, '').toLowerCase()};">${color}</option>
   `).join('');
 
@@ -1383,7 +1460,7 @@ const pageTopic = (data) => {
   };
 
   cContent = () => {
-    const container = document.createElement('section');
+    const container = document.createElement('main');
     container.className = 'content-section';
     posts.map(cPost).forEach(el => container.appendChild(el));
 
@@ -1784,6 +1861,8 @@ const pageTopic = (data) => {
 
   const handleUploadImageFile = () => {
     const input = holder.querySelector('input[name="image-file"]');
+    if (requests.length > 0) return;
+
     if (input.files[0]) {
       const progressbar = holder.querySelector('progress.image-upload');
       const data = {
@@ -1791,9 +1870,14 @@ const pageTopic = (data) => {
         Token: '67a71cae3f5ebf5de1ae72a26e854ef86d7c85a6:eXVvT3RWM3VuSnNCVlBWQzlpLXAxZkt5T1RvPQ==:eyJkZWFkbGluZSI6MTQ0MjQwOTExMSwiYWN0aW9uIjoiZ2V0IiwidWlkIjoiMTE4MTQiLCJhaWQiOiIyOTU3MCJ9',
       };
 
-      progressbar.value = 0;
+      progressbar.value = 10;
       const onprogress = (ev) => {
         progressbar.value = Math.floor((ev.loaded / ev.total) * 100);
+      };
+      const onsuccess = () => {
+        setTimeout(() => {
+          progressbar.value = 0;
+        }, 1000);
       };
       const fouthUpload = () => {
         ajaxMultipartSubmit('http://up.imgapi.com/', data, (res) => {
@@ -1803,13 +1887,14 @@ const pageTopic = (data) => {
           } catch (e) {
             d = { error: 'error' };
           }
-          progressbar.value = 0;
+          progressbar.value = 100;
           if (!d.error && d.linkurl) {
             input.value = '';
             editorInsert(` [img]${d.linkurl}[/img] `);
           } else {
             window.alert('上传失败');
           }
+          onsuccess();
         }, onprogress);
       };
       const thirdUpload = () => {
@@ -1820,41 +1905,44 @@ const pageTopic = (data) => {
           } catch (e) {
             d = { error: 'error' };
           }
-          progressbar.value = 0;
+          progressbar.value = 100;
           if (!d.error && d.linkurl) {
             input.value = '';
             editorInsert(` [img]${d.linkurl}[/img] `);
           } else {
             fouthUpload();
           }
+          onsuccess();
         }, onprogress);
       };
       const secondUpload = () => {
         ajaxMultipartSubmit('/ciar/sendtotietuku.php', data, (res) => {
-          progressbar.value = 0;
+          progressbar.value = 100;
           if (res) {
             input.value = '';
             editorInsert(` [img]${res}[/img] `);
           } else {
             thirdUpload();
           }
+          onsuccess();
         }, onprogress);
       };
       const firstUpload = () => {
-        ajaxMultipartSubmit('//hitptimg.online/takefile_v2.php', data, (res) => {
+        ajaxMultipartSubmit('//hitptimage.online/takefile.php', data, (res) => {
           let d = {};
           try {
             d = JSON.parse(res);
           } catch (e) {
             d = { error: 'error' };
           }
-          progressbar.value = 0;
+          progressbar.value = 100;
           if (!d.error && d.linkurl) {
             input.value = '';
             editorInsert(` [img]${d.linkurl}[/img] `);
           } else {
             secondUpload();
           }
+          onsuccess();
         }, onprogress);
       };
 
@@ -1921,8 +2009,217 @@ const pageTopic = (data) => {
   bindReplyListener();
 };
 
-const pageForum = (data) => {
+const pageForum = (data, params) => {
+  const forumid = params.forumid;
+  const topics = data.posts;
+  const me = data.me;
+  const info = data.other;
+  // const musicaddon = data.musicaddon;
 
+  const holder = document.getElementById('outer');
+  holder.removeChild(holder.firstChild);
+  // holder.innerHTML = '';
+  holder.id = 'content-holder';
+
+  const linkForums = '/forums.php';
+  const linkPlate = `/forums.php?action=viewforum&forumid=${forumid}`;
+  const link = linkPlate.concat(params.search ? encodeURIComponent(params.search) : '').concat('&page=');
+
+  const gLinkTopic = (topicid, page) => `/forums.php?action=viewtopic&forumid=${forumid}&topicid=${topicid}${page ? '&page=' + page : ''}`;
+
+  const repeatPage = (cur, page) => calcPageArr(cur, page).map(p => p
+    ? (p === cur)
+    ? `<li class="item"><a class="f-link current active" href="#">${p}</a>`
+    : `<li class="item"><a class="f-link" href="${link + (p - 1)}">${p}</a>`
+    : '<li class="item"><span>...</span></li>'
+  ).join('');
+
+  const cPagination = (cur, page) => `
+<ul class="line">
+  <li class="item"><a class="f-link" href="${cur === 0 ? '#' : (link + (cur - 1))}">&laquo;上一页</a></li>
+  ${repeatPage(cur + 1, page)}
+  <li class="item"><a class="f-link" href="${cur === (page - 1) ? '#' : (link + (cur + 1))}">下一页&raquo;</a></li>
+</ul>
+  `;
+
+  const cOperateArea = () => `
+${me.maypost ? '<button class="op-button new-topic">发&nbsp;&nbsp;帖</button>' : ''}
+  `;
+
+  const cTitleLine = () => {
+    const container = document.createElement('header');
+    container.classList.add('header-section');
+    container.classList.add('nopadding');
+    container.innerHTML = `
+<section class="line">
+  <div class="item topic-title">
+    <span class="forum"><a class="forum-link" href="${linkForums}">清影PT论坛</a></span>
+    <span class="raquo">   &gt;&gt;   </span>
+    <span class="forum title"><h1><a class="forum-link" href="${linkPlate}">${info['forumname']}</a></h1></span>
+  </div>
+  <div class="space"></div>
+  <div class="item forum-search">
+    <div><input type="text" class="forum-search" name="forum-search" value="${params.search || ''}" placeholder="输入搜索关键字" /></div>
+  </div>
+  <div class="item forum-operate">
+    ${cOperateArea()}
+  </div>
+</section>
+<section class="line">
+  <div class="item forum-info">
+    <em class="forum-moderator-label">版主</em> ${info.forummoderators}
+  </div>
+  <div class="space"></div>
+  <div class="item page-container">
+    ${cPagination(+params.page || 0, Math.ceil(+info.totalTopics / +info.topicsperpage))}
+  </div>
+</section>
+    `;
+    return container;
+  };
+
+  const cMusicPlayer = () => {
+    const container = document.createElement('div');
+    container.classList.add('music-addons');
+    container.innerHTML = '';
+    return container;
+  };
+
+  const cFooter = () => {
+    const container = document.createElement('footer');
+    container.classList.add('page-section');
+    container.classList.add('nopadding');
+    container.innerHTML = topics.length < +info.topicsperpage / 2 ? '' : `
+<section class="line">
+  <div class="space"></div>
+  <div class="item page-container">
+    ${cPagination(+params.page || 0, Math.ceil(+info.totalTopics / +info.topicsperpage))}
+  </div>
+</section>
+    `;
+    return container;
+  };
+
+  const cTopicPage = (topicid, page) => `
+<a class="f-link topic-page-link" href="${gLinkTopic(topicid, page)}">${page}</a>
+  `;
+
+  const cTopicSubject = (subject, hl) => hl ? `
+<strong><span class="topic-subject" style="color: ${paletteTable[hl - 1]};">${subject}</span></strong>
+  ` : `
+<span class="topic-subject">${subject}</span>
+  `;
+
+  const cTopic = (topic) => {
+    const pageArea = +topic.pages > 1 ? ' '.repeat(+topic.pages).split('').map((_, i) => cTopicPage(topic.topicid, i)).join('') : '';
+
+    const container = document.createElement('li');
+    container.classList.add('topic-row');
+    container.innerHTML = `
+<div class="line">
+  <div class="item">
+    <img class="${topic.locked ? 'locked' : 'unlocked'}" src="/pic/trans.gif" alt="${topic.new ? 'read' : 'unread'}" title="${topic.new ? '已读' : '未读'}">
+  </div>
+  <div class="space vline">
+    <div class="space line">
+      <div class="space text-left">
+        ${topic.sticky ? '<span class="sticky">[置顶]' : ''}
+        <a class="topic-link" href="${gLinkTopic(topic.topicid)}">
+          ${cTopicSubject(topic.subject, +topic.hlcolor)}
+        </a>
+      </div>
+      <div class="item">
+        <span class="topic-owner">
+          ${topic.fpauthor}
+        </span>
+      </div>
+      <div class="item">
+        <span class="topic-added-label">最早发布于</span>
+        <span class="topic-added">${topic.added}</span>
+      </div>
+    </div>
+    <div class="space line">
+      <div class="item">
+        <span class="topic-reply">回帖 (<strong>${topic.posts}</strong>)</span>
+        <span class="topic-click">点击 (<strong>${topic.topic_views}</strong>)</span>
+      </div>
+      <div class="space topic-page-area">
+        ${pageArea}
+      </div>
+      <div class="item">
+        <span class="topic-owner">
+          ${topic.lpusername}
+        </span>
+      </div>
+      <div class="item">
+        <span class="topic-lastreply-label">最后回复于</span>
+        <span class="topic-lastreply">${topic.added}</span>
+      </div>
+    </div>
+  </div>
+</div>
+    `;
+    return container;
+  };
+
+  const cContent = () => {
+    const container = document.createElement('main');
+    container.classList.add('content-section');
+    const list = document.createElement('ul');
+    list.classList.add('topic-list');
+    
+    container.appendChild(list);
+    topics.map(cTopic).forEach(el => list.appendChild(el));
+    
+    return container;
+  };
+
+  // // Event Listener
+  const handleNewTopic = () => {
+    fakeFormSubmit(linkForums, {
+      action: 'newtopic',
+      forumid,
+    });
+  };
+
+  const handleSearch = (ev) => {
+    const code = ev.which || ev.keyCode;
+    if (ev.ctrlKey && code === 13) {
+      const text = ev.target.value.trim();
+      if (text) {
+        fakeFormSubmit(linkForums, {
+          action: 'viewforum',
+          forumid,
+          search: text,
+        }, 'get');
+      }
+    }
+  };
+
+  // const handlePreviewPost = () => {};
+
+  // // Page Re-Render
+  const renderPages = () => {
+    Array.prototype.forEach.call(holder.querySelectorAll('a.f-link[href="#"]'), (el) => {
+      el.setAttribute('disabled', 'disabled');
+      el.addEventListener('click', ev => ev.preventDefault());
+    });
+  };
+
+  holder.appendChild(cTitleLine());
+  holder.appendChild(cContent());
+  holder.appendChild(cFooter());
+  holder.appendChild(cMusicPlayer());
+
+  setTimeout(() => renderPages());
+
+  const bindForumListener = () => {
+    listenerCreator(holder, '.op-button.new-topic', 'click', handleNewTopic);
+    listenerCreator(holder, 'input.forum-search', 'keydown', handleSearch);
+    // listenerCreator(holder, '.topic', 'mouseenter', handlePreviewPost);
+  };
+
+  bindForumListener();
 };
 
 const reRenderPage = () => {
@@ -1932,8 +2229,8 @@ const reRenderPage = () => {
   console.info(urlParams, data);
 
   switch (urlParams['action']) {
-    case 'viewtopic': pageTopic(data); break;
-    case 'viewforum': pageForum(data); break;
+    case 'viewtopic': pageTopic(data, urlParams); break;
+    case 'viewforum': pageForum(data, urlParams); break;
     default: break;
   }
 };
