@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Forum@ZunSThy
 // @name        QptUserScript Forum
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.1.338.2222
+// @version     0.2.15
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Forum.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Forum.user.js
@@ -18,7 +18,7 @@
 'use strict';
 
 const prefix = 'qpt';
-const ver = '0.1.338.2222';
+const ver = '0.2.15';
 
 const head = document.head || document.getElementsByTagName('head');
 const body = document.body;
