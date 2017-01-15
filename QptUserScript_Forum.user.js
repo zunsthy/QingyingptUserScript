@@ -29,6 +29,7 @@ const initCustomCSS = () => {
     black: '#333',
     gray: '#777',
     lightGray: '#adadad',
+    thinGray: '#eaeaea',
   };
   return `
 /* for container */
@@ -149,11 +150,11 @@ progress::-moz-progress-bar {
 .op-button, .op-select {
   line-height: 19px;
   padding: 5px;
-  border: 1px solid #eaeaea;
+  border: 1px solid ${theme.thinGray};
   border-radius: 4px;
   background-color: #f3f3f3;
-  /* box-shadow: 0 1px 1px #eaeaea; */
-  /* -webkit-box-shadow: 0 1px 1px #eaeaea; */
+  /* box-shadow: 0 1px 1px ${theme.thinGray}; */
+  /* -webkit-box-shadow: 0 1px 1px ${theme.thinGray}; */
   cursor: pointer;
 }
 .op-button:hover {
@@ -254,6 +255,10 @@ progress::-moz-progress-bar {
   font-weight: normal;
   line-height: 32px;
 }
+.topic-title > .forum > h1 {
+  font-size: 16px;
+  margin: 0;
+}
 
 a.forum-link {
   color: ${theme.green};
@@ -314,17 +319,72 @@ ul.topic-list > li {
   list-style: none;
 }
 .topic-row {
-  margin: 0;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  margin: 0 -5px;
+  padding: 5px 5px;
+  border-bottom: 1px solid ${theme.thinGray};
+  transition: background .15s ease-in;
+  -webkit-transition: background .15s ease-in;
+}
+.topic-row:first-child {
+  border-top: 1px solid ${theme.thinGray};
+}
+.topic-row:hover {
+  background-color: ${theme.thinGray};
 }
 
 .topic-page-area {
-  
   text-align: left;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 .topic-page-link {
   font-size: 12px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.topic-status-area > .topic-status {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin: 4px 6px 4px 0;
+  border-radius: 14px;
+  background-color: ${theme.gray};
+}
+.topic-status.sticky {
+  display: none;
+}
+.topic-status.locked {
+  background-color: #e3474c;
+}
+.topic-status.unread {
+  background-color: #bef5a7;
+}
+.topic-sticky {
+  color: #f77;
+  text-shadow: 1px 1px 2px #777, 0 0 1em #f77, 0 0 0.2em #f77;
+}
+.topic-subject {
+  font-size: 16px;
+}
+
+.topic-reply,
+.topic-click {
+  font-size: 12px;
+  color: ${theme.lightGray};
+}
+
+.topic-added,
+.topic-lastreply,
+.topic-added-label,
+.topic-lastreply-label {
+  font-size: 12px;
+  color: ${theme.lightGray};
+}
+.topic-owner,
+.topic-poster {
+  font-size: 12px;
+  padding: 0 5px;
 }
 
 .page-container {
@@ -341,7 +401,7 @@ ul.topic-list > li {
 }
 
 .post-holder {
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 1px solid ${theme.thinGray};
   padding-top: 10px;
   padding-bottom: 10px;
 }
@@ -349,7 +409,7 @@ ul.topic-list > li {
 .post-left {
   padding-right: 10px;
   margin-right: 10px;
-  border-right: 1px solid #eaeaea;
+  border-right: 1px solid ${theme.thinGray};
 }
 .t-avartar {
   text-align: left;
@@ -397,7 +457,7 @@ ul.topic-list > li {
 }
 .line.user-info:first-child {
   margin-bottom: 5px;
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 1px solid ${theme.thinGray};
 }
 .line.user-info:last-child {
   margin-top: 14px;
@@ -472,7 +532,7 @@ ul.topic-list > li {
   bottom: 28px;
   padding: 5px;
   border-radius: 4px;
-  background-color: #eaeaea;
+  background-color: ${theme.thinGray};
 }
 .gifts-list.show {
   display: block;
@@ -1870,7 +1930,7 @@ const pageTopic = (data, params) => {
         Token: '67a71cae3f5ebf5de1ae72a26e854ef86d7c85a6:eXVvT3RWM3VuSnNCVlBWQzlpLXAxZkt5T1RvPQ==:eyJkZWFkbGluZSI6MTQ0MjQwOTExMSwiYWN0aW9uIjoiZ2V0IiwidWlkIjoiMTE4MTQiLCJhaWQiOiIyOTU3MCJ9',
       };
 
-      progressbar.value = 10;
+      progressbar.value = 0;
       const onprogress = (ev) => {
         progressbar.value = Math.floor((ev.loaded / ev.total) * 100);
       };
@@ -2025,7 +2085,7 @@ const pageForum = (data, params) => {
   const linkPlate = `/forums.php?action=viewforum&forumid=${forumid}`;
   const link = linkPlate.concat(params.search ? encodeURIComponent(params.search) : '').concat('&page=');
 
-  const gLinkTopic = (topicid, page) => `/forums.php?action=viewtopic&forumid=${forumid}&topicid=${topicid}${page ? '&page=' + page : ''}`;
+  const gLinkTopic = (topicid, page) => `/forums.php?action=viewtopic&forumid=${forumid}&topicid=${topicid}${page !== undefined ? '&page=' + page : ''}`;
 
   const repeatPage = (cur, page) => calcPageArr(cur, page).map(p => p
     ? (p === cur)
@@ -2055,7 +2115,7 @@ ${me.maypost ? '<button class="op-button new-topic">发&nbsp;&nbsp;帖</button>'
   <div class="item topic-title">
     <span class="forum"><a class="forum-link" href="${linkForums}">清影PT论坛</a></span>
     <span class="raquo">   &gt;&gt;   </span>
-    <span class="forum title"><h1><a class="forum-link" href="${linkPlate}">${info['forumname']}</a></h1></span>
+    <span class="forum"><h1><a class="forum-link" href="${linkPlate}">${info['forumname']}</a></h1></span>
   </div>
   <div class="space"></div>
   <div class="item forum-search">
@@ -2101,7 +2161,7 @@ ${me.maypost ? '<button class="op-button new-topic">发&nbsp;&nbsp;帖</button>'
   };
 
   const cTopicPage = (topicid, page) => `
-<a class="f-link topic-page-link" href="${gLinkTopic(topicid, page)}">${page}</a>
+<a class="f-link topic-page-link" href="${gLinkTopic(topicid, page)}">${page + 1}</a>
   `;
 
   const cTopicSubject = (subject, hl) => hl ? `
@@ -2115,15 +2175,18 @@ ${me.maypost ? '<button class="op-button new-topic">发&nbsp;&nbsp;帖</button>'
 
     const container = document.createElement('li');
     container.classList.add('topic-row');
+    container.classList.add(topic.new ? 'read' : 'unread');
     container.innerHTML = `
 <div class="line">
-  <div class="item">
-    <img class="${topic.locked ? 'locked' : 'unlocked'}" src="/pic/trans.gif" alt="${topic.new ? 'read' : 'unread'}" title="${topic.new ? '已读' : '未读'}">
-  </div>
   <div class="space vline">
     <div class="space line">
+      <div class="item topic-status-area">
+        ${topic.sticky ? '<div class="topic-status sticky" title="置顶帖"></div>' : ''}
+        ${topic.locked ? '<div class="topic-status locked" title="锁定"></div>' : ''}
+        ${!topic.new ? '<div class="topic-status unread" title="未读"></div>' : ''}
+      </div>
       <div class="space text-left">
-        ${topic.sticky ? '<span class="sticky">[置顶]' : ''}
+        ${topic.sticky ? '<span class="topic-sticky">顶</span>' : ''}
         <a class="topic-link" href="${gLinkTopic(topic.topicid)}">
           ${cTopicSubject(topic.subject, +topic.hlcolor)}
         </a>
@@ -2134,7 +2197,7 @@ ${me.maypost ? '<button class="op-button new-topic">发&nbsp;&nbsp;帖</button>'
         </span>
       </div>
       <div class="item">
-        <span class="topic-added-label">最早发布于</span>
+        <span class="topic-added-label">发布于</span>
         <span class="topic-added">${topic.added}</span>
       </div>
     </div>
@@ -2147,13 +2210,13 @@ ${me.maypost ? '<button class="op-button new-topic">发&nbsp;&nbsp;帖</button>'
         ${pageArea}
       </div>
       <div class="item">
-        <span class="topic-owner">
+        <span class="topic-poster">
           ${topic.lpusername}
         </span>
       </div>
       <div class="item">
-        <span class="topic-lastreply-label">最后回复于</span>
-        <span class="topic-lastreply">${topic.added}</span>
+        <span class="topic-lastreply-label">回复于</span>
+        <span class="topic-lastreply">${topic.lpadded}</span>
       </div>
     </div>
   </div>
@@ -2179,12 +2242,12 @@ ${me.maypost ? '<button class="op-button new-topic">发&nbsp;&nbsp;帖</button>'
     fakeFormSubmit(linkForums, {
       action: 'newtopic',
       forumid,
-    });
+    }, 'get');
   };
 
   const handleSearch = (ev) => {
     const code = ev.which || ev.keyCode;
-    if (ev.ctrlKey && code === 13) {
+    if (code === 13) {
       const text = ev.target.value.trim();
       if (text) {
         fakeFormSubmit(linkForums, {
