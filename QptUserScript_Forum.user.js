@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Forum@ZunSThy
 // @name        QptUserScript Forum
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.2.15
+// @version     0.2.36.0
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Forum.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Forum.user.js
@@ -17,8 +17,9 @@
 (() => {
 'use strict';
 
-const prefix = 'qpt';
-const ver = '0.2.15';
+const suffix = 'QPT';
+const coder = 'zunsthy';
+const ver = '0.2.36.0';
 
 const head = document.head || document.getElementsByTagName('head');
 const body = document.body;
@@ -72,6 +73,7 @@ section {
   padding: 10px 20px;
 }
 header.nopadding,
+main.nopadding,
 section.nopadding,
 footer.nopadding {
   padding: 0;
@@ -230,6 +232,7 @@ progress::-moz-progress-bar {
 
 .topic-title {
   font-size: 14px;
+  max-width: 90%;
 }
 .topic-title > .forum,
 .topic-title > .raquo,
@@ -322,8 +325,8 @@ ul.topic-list > li {
   margin: 0 -5px;
   padding: 5px 5px;
   border-bottom: 1px solid ${theme.thinGray};
-  transition: background .15s ease-in;
   -webkit-transition: background .15s ease-in;
+  transition: background .15s ease-in;
 }
 .topic-row:first-child {
   border-top: 1px solid ${theme.thinGray};
@@ -366,6 +369,11 @@ ul.topic-list > li {
 }
 .topic-subject {
   font-size: 16px;
+  -webkit-transition: color .5s linear;
+  transition: color .15s linear;
+}
+.topic-subject:hover {
+  color: red !important;
 }
 
 .topic-reply,
@@ -695,6 +703,67 @@ ul.reply-functions > li > input:checked + label {
   height: 33px;
 }
 
+.forum-stat {
+  color: ${theme.lightGray};
+  margin-right: 10px;
+}
+.forum-user {
+  color: ${theme.lightGray};
+}
+
+.section-name-holder {
+  margin: 5px 100px;
+}
+.section-name {
+  padding:5px;
+  font-size: 16px;
+  font-weight: bolder;
+  background-image: -webkit-linear-gradient(left, transparent 0%, ${theme.thinGray} 15%, ${theme.thinGray} 85%, transparent 100%);
+  background-image: linear-gradient(left, transparent 0%, ${theme.thinGray} 15%, ${theme.thinGray} 85%, transparent 100%);
+}
+.section-name > span {
+  padding: 5px;
+  background-color: #fff;
+}
+
+.plate-list {
+  list-style: none;
+  padding-left: 0;
+}
+.plate-row {
+  margin: 0 -5px;
+  padding: 10px 5px;
+  border-bottom: 1px solid ${theme.thinGray};
+  -webkit-transition: background .15s ease-in;
+  transition: background .15s ease-in;
+}
+.plate-row:first-child {
+  border-top: 1px solid ${theme.thinGray};
+}
+.plate-row:hover {
+  background-color: ${theme.thinGray};
+}
+
+.plate-stat {
+  color: ${theme.lightGray};
+}
+.plate-name {
+  font-size: 16px;
+  font-weight: bolder;
+}
+.plate-name:hover {
+  color: red;
+}
+.plate-description {
+  padding-top: 1px;
+  margin-left: 20px;
+}
+.plate-topic-label,
+.plate-topic-subject {
+  font-size: 12px;
+  padding: 0 5px;
+}
+
 .bbcode {
 }
 .bbcode-b {
@@ -895,6 +964,14 @@ code {
   display: inline-block;
 }
   `;
+};
+
+const noteFooter = () => {
+  const footer = document.getElementById('footer');
+  if (footer) {
+    const text = document.createTextNode(`清影论坛增强样式脚本 v${ver} 作者 ${coder}@${suffix} `);
+    footer.firstChild.appendChild(text);
+  }
 };
 
 const customStyle = (css) => {
@@ -1361,7 +1438,7 @@ const pageTopic = (data, params) => {
     container.className = 'header-section nopadding';
     container.innerHTML = `
 <section class="line">
-  <div class="item topic-title">
+  <div class="item topic-title text-left">
     <span class="forum"><a class="forum-link" href="${linkForums}">清影PT论坛</a></span>
     <span class="raquo">   &gt;&gt;   </span>
     <span class="forum"><a class="forum-link" href="${linkPlate}">${info['forumname']}</a></span>
@@ -2069,7 +2146,7 @@ const pageTopic = (data, params) => {
   bindReplyListener();
 };
 
-const pageForum = (data, params) => {
+const pagePlate = (data, params) => {
   const forumid = params.forumid;
   const topics = data.posts;
   const me = data.me;
@@ -2112,7 +2189,7 @@ ${me.maypost ? '<button class="op-button new-topic">发&nbsp;&nbsp;帖</button>'
     container.classList.add('nopadding');
     container.innerHTML = `
 <section class="line">
-  <div class="item topic-title">
+  <div class="item topic-title text-left">
     <span class="forum"><a class="forum-link" href="${linkForums}">清影PT论坛</a></span>
     <span class="raquo">   &gt;&gt;   </span>
     <span class="forum"><h1><a class="forum-link" href="${linkPlate}">${info['forumname']}</a></h1></span>
@@ -2230,10 +2307,10 @@ ${me.maypost ? '<button class="op-button new-topic">发&nbsp;&nbsp;帖</button>'
     container.classList.add('content-section');
     const list = document.createElement('ul');
     list.classList.add('topic-list');
-    
+
     container.appendChild(list);
     topics.map(cTopic).forEach(el => list.appendChild(el));
-    
+
     return container;
   };
 
@@ -2285,6 +2362,173 @@ ${me.maypost ? '<button class="op-button new-topic">发&nbsp;&nbsp;帖</button>'
   bindForumListener();
 };
 
+const pageForum = (data, params) => {
+  const me = data.me;
+  const stats = data.forumstats;
+  const sections = data.all;
+
+  const holder = document.getElementById('outer');
+  holder.removeChild(holder.firstChild);
+  holder.id = 'content-holder';
+
+  const linkForum = '/forums.php';
+  const linkPlate = '/forums.php?action=viewforum&forumid=';
+  const linkTopic = '/forums.php?action=viewtopic&page=last&topicid=';
+  const linkForumManage = '/forummanage.php';
+
+  const cOperateArea = () => `
+<button class="op-button view-unread">查看未读</button>
+${me.forummanage ? '<button class="op-button forum-manage">论坛管理</button>' : ''}
+  `;
+
+  const cTitleLine = () => {
+    const container = document.createElement('header');
+    container.classList.add('header-section');
+    container.classList.add('nopadding');
+    container.innerHTML = `
+<section class="line">
+  <div class="item topic-title text-left">
+    <span class="forum"><h1><a class="forum-link" href="${linkForum}">清影PT论坛</a></h1></span>
+  </div>
+  <div class="space"></div>
+  <div class="item forum-search">
+    <input type="text" class="forum-search" name="forum-search" value="${params.keywords || ''}" placeholder="输入搜索关键字" />
+  </div>
+  <div class="item forum-operate">
+    ${cOperateArea()}
+  </div>
+</section>
+<section class="line">
+  <div class="space text-left">
+    <span class="forum-stat">主题总数 <strong>${stats[2]}</strong> </span>
+    <span class="forum-stat">帖子总数 <strong>${stats[1]}</strong> </span>
+    <span class="forum-stat">今日发帖 <strong style="color: red;">${stats[3]}</strong> </span>
+  </div>
+  <div class="item">
+    <span class="forum-user">当前在线人数 <strong>${stats[0]}</strong> </span>
+  </div>
+</section>
+    `;
+
+    return container;
+  };
+
+  const cTopicSubject = (subject, hl) => hl ? `
+<strong><span class="topic-subject plate-topic-subject" style="color: ${paletteTable[hl - 1]};">${subject}</span></strong>
+  ` : `
+<span class="topic-subject plate-topic-subject">${subject}</span>
+  `;
+
+  const cPlateModerator = moderators => (moderators === 'no' ? '<i>诚征中</i>' : moderators);
+
+  const cPlate = (plate) => {
+    const li = document.createElement('li');
+    li.classList.add('plate-row');
+    li.innerHTML = `
+<div class="line" style="margin-bottom: 5px;">
+  <div class="item topic-status-area">
+    ${plate.img === 'unread' ? '<div class="topic-status unread" title="未读"></div>' : ''}
+  </div>
+  <div class="item">
+    <a href="${linkPlate + plate.id}">
+      <span class="plate-name">${plate.name}</span>
+    </a>
+  </div>
+  <div class="item"><div class="plate-description"><i>${plate.description}</i></div></div>
+  <div class="space"></div>
+  <div class="item">
+    <span class="plate-mod">版主 ${cPlateModerator(plate.moderators)}</span>
+  </div>
+</div>
+<div class="line">
+  <div class="item">
+    <span class="plate-stat">主题(<strong>${plate.topiccount}</strong>)</span>
+    <span class="plate-stat">发帖(<strong>${plate.postcount}</strong>)</span>
+    ${plate.posttodaycount ? ('<span class="plate-stat">今日发帖(<strong style="color: red;">' + plate.posttodaycount + '</strong>)</span>') : ''}
+  </div>
+  <div class="space"></div>
+  <div class="item"><span class="plate-topic-label">最近发帖</span></div>
+  <div class="item">
+    <a href="${linkTopic + plate.lasttopicid}" target="_blank">
+      ${cTopicSubject(plate.subject, plate.hlcolor)}
+    </a>
+  </div>
+  <div class="item"><span class="topic-poster">${plate.lastposter}</span></div>
+  <div class="item"><span class="topic-lastreply">${plate.lastpostdate}</span></div>
+</div>
+    `;
+
+    return li;
+  };
+
+  const cPlateSection = (section) => {
+    const container = document.createElement('section');
+    container.classList.add('plate-section');
+
+    const div = document.createElement('div');
+    div.classList.add('section-name-holder');
+    div.innerHTML = `
+<div class="split"></div>
+<div class="section-name"><span>${section.name}</span></div>
+    `;
+    container.appendChild(div);
+
+    delete section.name;
+    const ul = document.createElement('ul');
+    ul.classList.add('plate-list');
+    Object.keys(section).forEach(k => ul.appendChild(cPlate(section[k])));
+    container.appendChild(ul);
+
+    return container;
+  };
+
+  const cForumSection = () => {
+    const container = document.createElement('main');
+    container.classList.add('nopadding');
+
+    sections.forEach(section => container.appendChild(cPlateSection(section)));
+
+    return container;
+  };
+
+  // // Event Listener
+  const handleSearch = (ev) => {
+    const code = ev.which || ev.keyCode;
+    if (code === 13) {
+      const text = ev.target.value.trim();
+      if (text) {
+        fakeFormSubmit(linkForum, {
+          action: 'search',
+          keywords: text,
+        }, 'get');
+      }
+    }
+  };
+
+  const handleClickUnread = () => {
+    fakeFormSubmit(linkForum, {
+      action: 'viewunread',
+    }, 'get');
+  };
+
+  const handleClickManage = () => {
+    fakeFormSubmit(linkForumManage, {
+    }, 'get');
+  };
+
+  // // Page Re-Render
+  holder.appendChild(cTitleLine());
+  holder.appendChild(cForumSection());
+
+  const bindForumListener = () => {
+    listenerCreator(holder, 'input.forum-search', 'keydown', handleSearch);
+    listenerCreator(holder, '.view-unread', 'click', handleClickUnread);
+    listenerCreator(holder, '.forum-manage', 'click', handleClickManage);
+  };
+
+  bindForumListener();
+};
+
 const reRenderPage = () => {
   const ori = window.passToClient;
   const urlParams = window.urlParams;
@@ -2293,10 +2537,12 @@ const reRenderPage = () => {
 
   switch (urlParams['action']) {
     case 'viewtopic': pageTopic(data, urlParams); break;
-    case 'viewforum': pageForum(data, urlParams); break;
+    case 'viewforum': pagePlate(data, urlParams); break;
+    case undefined: pageForum(data, urlParams); break;
     default: break;
   }
 };
 
 reRenderPage();
+noteFooter();
 })();
