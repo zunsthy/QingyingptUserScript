@@ -265,7 +265,7 @@ progress::-moz-progress-bar {
 
 a.forum-link {
   color: ${theme.green};
-  text-decoratio: none;
+  text-decoration: none;
 }
 a.forum-link:hover {
   color: #f00;
