@@ -149,7 +149,9 @@ progress::-moz-progress-bar {
   text-align: right;
 }
 
-.op-button, .op-select {
+.op-button,
+.op-select {
+  display: inline-block;
   line-height: 19px;
   padding: 5px;
   border: 1px solid ${theme.thinGray};
@@ -2268,15 +2270,6 @@ ${me.maypost ? '<button class="op-button new-topic">发&nbsp;&nbsp;帖</button>'
           ${cTopicSubject(topic.subject, +topic.hlcolor)}
         </a>
       </div>
-      <div class="item">
-        <span class="topic-owner">
-          ${topic.fpauthor}
-        </span>
-      </div>
-      <div class="item">
-        <span class="topic-added-label">发布于</span>
-        <span class="topic-added">${topic.added}</span>
-      </div>
     </div>
     <div class="space line">
       <div class="item">
@@ -2286,15 +2279,18 @@ ${me.maypost ? '<button class="op-button new-topic">发&nbsp;&nbsp;帖</button>'
       <div class="space topic-page-area">
         ${pageArea}
       </div>
-      <div class="item">
-        <span class="topic-poster">
-          ${topic.lpusername}
-        </span>
-      </div>
-      <div class="item">
-        <span class="topic-lastreply-label">回复于</span>
-        <span class="topic-lastreply">${topic.lpadded}</span>
-      </div>
+    </div>
+  </div>
+  <div class="item vline">
+    <div class="space text-right">
+      <span class="topic-owner">${topic.fpauthor} </span>
+      <span class="topic-added-label">发布于</span>
+      <span class="topic-added">${topic.added}</span>
+    </div>
+    <div class="space text-right">
+      <span class="topic-poster">${topic.lpusername} </span>
+      <span class="topic-lastreply-label">回复于</span>
+      <span class="topic-lastreply">${topic.lpadded}</span>
     </div>
   </div>
 </div>
@@ -2529,6 +2525,113 @@ ${me.forummanage ? '<button class="op-button forum-manage">论坛管理</button>
   bindForumListener();
 };
 
+const pageUnread = (data, params) => {
+  const linkForums = '/forums.php';
+  const linkPlate = '/forums.php?action=viewforum&forumid=';
+  const linkViewMoreUnread = '/forums.php?action=viewunread&beforepostid=';
+  const gLinkTopic = (forumid, topicid) => `/forums.php?action=viewtopic&forumid=${forumid}&topicid=${topicid}&page=last`;
+
+  const topics = data.posts;
+  const lastpost = data.topiclastpost;
+  const more = data.more === 'yes';
+
+  const holder = document.getElementById('outer');
+  holder.removeChild(holder.firstChild);
+  // holder.innerHTML = '';
+  holder.id = 'content-holder';
+
+  const cOperateArea = () => `
+${more ? ('<a class="op-button viewmore" href="' + linkViewMoreUnread + lastpost + '">查看更多</a>') : ''}
+<a class="op-button readall" href="${linkForums}?catchup=1">装作看完</a>
+  `;
+
+  const cTitleLine = () => {
+    const container = document.createElement('header');
+    container.classList.add('header-section');
+    container.classList.add('nopadding');
+    container.innerHTML = `
+<section class="line">
+  <div class="item topic-title text-left">
+    <span class="forum"><a class="forum-link" href="${linkForums}">清影PT论坛</a></span>
+    <span class="raquo">   &gt;&gt;   </span>
+    <span class="forum"><h1>查看未读</h1></span>
+  </div>
+  <div class="space"></div>
+  <div class="item forum-operate">
+    ${cOperateArea()}
+  </div>
+</section>
+    `;
+    return container;
+  };
+
+  const cTopicSubject = (subject, hl) => hl ? `
+<strong><span class="topic-subject" style="color: ${paletteTable[hl - 1]};">${subject}</span></strong>
+  ` : `
+<span class="topic-subject">${subject}</span>
+  `;
+
+  const cTopic = ({ forumid, forumname, topicid, subject, locked, hlcolor, lpadded, lpusername, views, count }) => {
+    const li = document.createElement('li');
+    li.classList.add('topic-row');
+    li.classList.add('unread');
+
+    li.innerHTML = `
+<div class="line">
+  <div class="space vline">
+    <div class="space line">
+      <div class="item topic-status-area">
+        ${locked ? '<div class="topic-status locked" title="锁定"></div>' : ''}
+        <div class="topic-status unread" title="未读"></div>
+      </div>
+      <div class="space text-left">
+        <a class="topic-link" href="${gLinkTopic(forumid, topicid)}">
+          ${cTopicSubject(subject, +hlcolor)}
+        </a>
+      </div>
+    </div>
+    <div class="space line">
+      <div class="item">
+        <span class="topic-reply">回帖 (<strong>${count}</strong>)</span>
+        <span class="topic-click">点击 (<strong>${views}</strong>)</span>
+      </div>
+    </div>
+  </div>
+  <div class="item vline">
+    <div class="space text-right">
+      <a href="${linkPlate}${forumid}" target="_blank">
+        <span class="plate-name">${forumname}</span>
+      </a>
+    </div>
+    <div class="item text-right">
+      <span class="topic-poster">${lpusername} </span>
+      <span class="topic-lastreply-label">回复于</span>
+      <span class="topic-lastreply">${lpadded}</span>
+    </div>
+  </div>
+</div>
+    `;
+
+    return li;
+  };
+
+  const cContent = () => {
+    const container = document.createElement('main');
+    container.classList.add('content-section');
+    const list = document.createElement('ul');
+    list.classList.add('topic-list');
+
+    container.appendChild(list);
+    topics.map(cTopic).forEach(el => list.appendChild(el));
+
+    return container;
+  };
+
+  // // Page Re-render
+  holder.appendChild(cTitleLine());
+  holder.appendChild(cContent());
+};
+
 const reRenderPage = () => {
   const ori = window.passToClient;
   const urlParams = window.urlParams;
@@ -2538,6 +2641,7 @@ const reRenderPage = () => {
   switch (urlParams['action']) {
     case 'viewtopic': pageTopic(data, urlParams); break;
     case 'viewforum': pagePlate(data, urlParams); break;
+    case 'viewunread': pageUnread(data, urlParams); break;
     case undefined: pageForum(data, urlParams); break;
     default: break;
   }
