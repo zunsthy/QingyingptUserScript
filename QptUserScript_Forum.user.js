@@ -19,7 +19,7 @@
 
 const suffix = 'QPT';
 const coder = 'zunsthy';
-const ver = '0.2.42.0';
+const ver = '0.2.42';
 
 const head = document.head || document.getElementsByTagName('head');
 const body = document.body;
@@ -2581,7 +2581,7 @@ ${more ? ('<a class="op-button viewmore" href="' + linkViewMoreUnread + lastpost
   <div class="space vline">
     <div class="space line">
       <div class="item topic-status-area">
-        ${locked ? '<div class="topic-status locked" title="锁定"></div>' : ''}
+        ${locked === 'yes' ? '<div class="topic-status locked" title="锁定"></div>' : ''}
         <div class="topic-status unread" title="未读"></div>
       </div>
       <div class="space text-left">
