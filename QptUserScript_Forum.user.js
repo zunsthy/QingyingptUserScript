@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Forum@ZunSThy
 // @name        QptUserScript Forum
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.2.42.1
+// @version     0.2.42.2
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Forum.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Forum.user.js
@@ -764,6 +764,9 @@ ul.reply-functions > li > input:checked + label {
 .plate-topic-subject {
   font-size: 12px;
   padding: 0 5px;
+}
+.plate-topic-label {
+  color: ${theme.lightGray}
 }
 
 .bbcode {
@@ -2185,6 +2188,8 @@ const pagePlate = (data, params) => {
 ${me.maypost ? '<button class="op-button new-topic">发&nbsp;&nbsp;帖</button>' : ''}
   `;
 
+  const cPlateModerator = moderators => (moderators === 'no' ? '<i>诚征中</i>' : moderators);
+
   const cTitleLine = () => {
     const container = document.createElement('header');
     container.classList.add('header-section');
@@ -2206,7 +2211,7 @@ ${me.maypost ? '<button class="op-button new-topic">发&nbsp;&nbsp;帖</button>'
 </section>
 <section class="line">
   <div class="item forum-info">
-    <em class="forum-moderator-label">版主</em> ${info.forummoderators}
+    <em class="forum-moderator-label">版主</em> ${cPlateModerator(info.forummoderators)}
   </div>
   <div class="space"></div>
   <div class="item page-container">
@@ -2423,7 +2428,7 @@ ${me.forummanage ? '<button class="op-button forum-manage">论坛管理</button>
     li.innerHTML = `
 <div class="line" style="margin-bottom: 5px;">
   <div class="item topic-status-area">
-    ${plate.img === 'unread' ? '<div class="topic-status unread" title="未读"></div>' : ''}
+    ${plate.img === 'unread' ? '<div class="topic-status unread" title="未读帖子"></div>' : ''}
   </div>
   <div class="item">
     <a href="${linkPlate + plate.id}">
@@ -2446,7 +2451,7 @@ ${me.forummanage ? '<button class="op-button forum-manage">论坛管理</button>
   <div class="item"><span class="plate-topic-label">最近发帖</span></div>
   <div class="item">
     <a href="${linkTopic + plate.lasttopicid}" target="_blank">
-      ${cTopicSubject(plate.subject, plate.hlcolor)}
+      ${cTopicSubject(plate.subject, +plate.hlcolor)}
     </a>
   </div>
   <div class="item"><span class="topic-poster">${plate.lastposter}</span></div>
@@ -2525,10 +2530,9 @@ ${me.forummanage ? '<button class="op-button forum-manage">论坛管理</button>
   bindForumListener();
 };
 
-const pageUnread = (data, params) => {
-  const linkForums = '/forums.php';
-  const linkPlate = '/forums.php?action=viewforum&forumid=';
-  const linkViewMoreUnread = '/forums.php?action=viewunread&beforepostid=';
+const pageUnread = (data) => {
+  const linkForum = '/forums.php';
+  const glinkPlate = (forumid) => `/forums.php?action=viewforum&forumid=${forumid}`;
   const gLinkTopic = (forumid, topicid) => `/forums.php?action=viewtopic&forumid=${forumid}&topicid=${topicid}&page=last`;
 
   const topics = data.posts;
@@ -2541,8 +2545,8 @@ const pageUnread = (data, params) => {
   holder.id = 'content-holder';
 
   const cOperateArea = () => `
-${more ? ('<a class="op-button viewmore" href="' + linkViewMoreUnread + lastpost + '">查看更多</a>') : ''}
-<a class="op-button readall" href="${linkForums}?catchup=1">装作看完</a>
+${more ? ('<button class="op-button viewmore">查看更多</button>') : ''}
+<button class="op-button readall">装作看完</button>
   `;
 
   const cTitleLine = () => {
@@ -2552,7 +2556,7 @@ ${more ? ('<a class="op-button viewmore" href="' + linkViewMoreUnread + lastpost
     container.innerHTML = `
 <section class="line">
   <div class="item topic-title text-left">
-    <span class="forum"><a class="forum-link" href="${linkForums}">清影PT论坛</a></span>
+    <span class="forum"><a class="forum-link" href="${linkForum}">清影PT论坛</a></span>
     <span class="raquo">   &gt;&gt;   </span>
     <span class="forum"><h1>查看未读</h1></span>
   </div>
@@ -2599,7 +2603,7 @@ ${more ? ('<a class="op-button viewmore" href="' + linkViewMoreUnread + lastpost
   </div>
   <div class="item vline">
     <div class="space text-right">
-      <a href="${linkPlate}${forumid}" target="_blank">
+      <a href="${glinkPlate(forumid)}" target="_blank">
         <span class="plate-name">${forumname}</span>
       </a>
     </div>
@@ -2626,10 +2630,30 @@ ${more ? ('<a class="op-button viewmore" href="' + linkViewMoreUnread + lastpost
 
     return container;
   };
+  // // Event Listener
+  const handleViewMore = () => {
+    fakeFormSubmit(linkForum, {
+      action: 'viewunread',
+      beforepostid: lastpost,
+    }, 'get');
+  };
+
+  const handleReadAll = () => {
+    fakeFormSubmit(linkForum, {
+      catchup: 1,
+    }, 'get');
+  };
+
+  const bindForumListener = () => {
+    listenerCreator(holder, '.op-button.viewmore', 'click', handleViewMore);
+    listenerCreator(holder, '.op-button.readall', 'click', handleReadAll);
+  };
 
   // // Page Re-render
   holder.appendChild(cTitleLine());
   holder.appendChild(cContent());
+
+  bindForumListener();
 };
 
 const reRenderPage = () => {
