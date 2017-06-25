@@ -66,10 +66,10 @@ input, progress {
   box-sizing: border-box;
 }
 
-header,
-main,
-footer,
-section {
+.mainouter header,
+.mainouter main,
+.mainouter footer,
+.mainouter section {
   padding: 10px 20px;
 }
 header.nopadding,
