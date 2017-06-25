@@ -2,7 +2,7 @@
 // @id          Qptuserscript_Forum@ZunSThy
 // @name        QptUserScript Forum
 // @author      ZunSThy <zunsthy@gmail.com>
-// @version     0.2.42.2
+// @version     0.2.43.0
 // @namespace   https://github.com/zunsthy/QingyingptUserScript
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Forum.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/QptUserScript_Forum.user.js
@@ -66,10 +66,10 @@ input, progress {
   box-sizing: border-box;
 }
 
-header,
-main,
-footer,
-section {
+.mainouter header,
+.mainouter main,
+.mainouter footer,
+.mainouter section {
   padding: 10px 20px;
 }
 header.nopadding,
