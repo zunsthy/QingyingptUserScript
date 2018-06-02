@@ -8,7 +8,7 @@
 // @include     http://bt.byr.cn/forums.php?*
 // @match       https://bt.byr.cn/forums.php?*
 // @match       http://bt.byr.cn/forums.php?*
-// @version     0.2.1
+// @version     0.2.2
 // @updateURL   https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/BYRUserScript_realignForumsBadges.meta.js
 // @downloadURL https://raw.githubusercontent.com/zunsthy/QingyingptUserScript/master/BYRUserScript_realignForumsBadges.user.js
 // @grant       none
